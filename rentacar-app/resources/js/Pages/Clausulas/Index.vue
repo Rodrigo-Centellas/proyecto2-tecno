@@ -3,6 +3,10 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, router, Link } from '@inertiajs/vue3';
 import Swal from 'sweetalert2';
 
+import { useBaseUrl } from '@/composables/useBaseUrl'
+const { url } = useBaseUrl()
+
+
 const props = defineProps({ clausulas: Array });
 const eliminar = id => {
   Swal.fire({
@@ -29,7 +33,7 @@ const eliminar = id => {
       <div class="card-bg p-6 rounded-2xl shadow-lg">
         <div class="flex justify-between items-center mb-6">
           <h1 class="font-bold" style="font-size:calc(1em+0.5rem)">Listado de Cláusulas</h1>
-          <Link href="/clausulas/create" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 shadow-md"
+          <Link :href="url('/clausulas/create')" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 shadow-md"
             style="font-size:inherit">
           Nueva Cláusula
           </Link>
