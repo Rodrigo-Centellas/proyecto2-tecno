@@ -1,0 +1,91 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Temas personalizados */
+body.niños {
+    --bg: #ffe6f0;
+    --text: #000000;
+    --card-bg: #fff0f5;
+    --nav-bg: #ffdee9;
+}
+
+body.jovenes {
+    --bg: #e0f7fa;
+    --text: #111111;
+    --card-bg: #e6faff;
+    --nav-bg: #c0e7ef;
+}
+
+body.adultos {
+    --bg: #f3f4f6;
+    --text: #222222;
+    --card-bg: #ffffff;
+    --nav-bg: #e5e7eb;
+}
+
+body.day {
+    --bg: #ffffff;
+    --text: #000000;
+    --card-bg: #f9f9f9;
+    --nav-bg: #f1f1f1;
+}
+
+body.night {
+    --bg: #1a202c;
+    --text: #ffffff;
+    --card-bg: #2d3748;
+    --nav-bg: #2a2e37;
+}
+
+/* Tamaño de fuente */
+body.small {
+    font-size: 10px;
+}
+body.normal {
+    font-size: 16px;
+}
+body.large {
+    font-size: 25px;
+}
+
+/* Contraste alto */
+body.high {
+    filter: contrast(120%);
+}
+
+/* Fondo y texto principal */
+body {
+    background-color: var(--bg);
+    color: var(--text);
+    font-size: inherit;
+}
+
+/* Componentes visuales */
+.card {
+    background-color: var(--card-bg);
+    color: var(--text);
+}
+.nav {
+    background-color: var(--nav-bg);
+    color: var(--text);
+}
+.table {
+    color: var(--text);
+}
+
+/* Formularios y selects */
+input,
+select,
+button,
+textarea {
+    background-color: var(--card-bg);
+    color: var(--text);
+    border-color: #ccc;
+    font-size: inherit;
+}
+
+select option {
+    background-color: var(--card-bg);
+    color: var(--text);
+}

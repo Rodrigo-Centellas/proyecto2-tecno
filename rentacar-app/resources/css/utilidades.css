@@ -1,0 +1,16 @@
+/* Utilidades para temas dinámicos */
+.bg-main {
+    background-color: var(--bg-main);
+}
+
+.text-main {
+    color: var(--text-main);
+}
+
+.card-bg {
+    background-color: var(--card-bg);
+}
+
+.nav-bg {
+    background-color: var(--nav-bg);
+}
