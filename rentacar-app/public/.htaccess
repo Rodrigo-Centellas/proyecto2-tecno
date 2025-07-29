@@ -4,6 +4,9 @@
     </IfModule>
 
     RewriteEngine On
+    
+    # Configurar la base del subdirectorio
+    RewriteBase /inf513/grupo20sa/proyecto2/proyecto2-tecno/rentacar-app/public/
 
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
