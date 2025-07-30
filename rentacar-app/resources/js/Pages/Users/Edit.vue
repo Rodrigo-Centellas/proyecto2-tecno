@@ -3,7 +3,8 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, router } from '@inertiajs/vue3';
 import { ref } from 'vue';
 import Swal from 'sweetalert2';
-
+import { useBaseUrl } from '@/composables/useBaseUrl'
+const { url } = useBaseUrl()
 const props = defineProps({
     user: Object,
     roles: Array,
@@ -21,7 +22,7 @@ const processing = ref(false);
 const enviar = () => {
     processing.value = true;
 
-    router.put(`/users/${props.user.id}`, {
+    router.put(url(`/users/${props.user.id}`), {
         name: name.value,
         apellido: apellido.value,
         ci: ci.value,
@@ -36,7 +37,7 @@ const enviar = () => {
                 text: 'Los datos del usuario fueron actualizados correctamente.',
                 icon: 'success',
             }).then(() => {
-                router.visit('/users');
+                router.visit(url('/users'));
             });
         },
         onFinish: () => {

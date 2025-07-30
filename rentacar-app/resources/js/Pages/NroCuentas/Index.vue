@@ -3,7 +3,8 @@ import { Head, Link, router } from '@inertiajs/vue3'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import { ref } from 'vue'
 import Swal from 'sweetalert2'
-
+import { useBaseUrl } from '@/composables/useBaseUrl'
+const { url } = useBaseUrl()
 // Props recibidos de Inertia
 const props = defineProps({
   nroCuentas: Array,
@@ -15,7 +16,7 @@ const search = ref(props.filters.search || '')
 
 // Función para buscar manteniendo estado y reemplazo de URL
 const buscar = () => {
-  router.get(route('nro-cuentas.index'), { search: search.value }, {
+  router.get(route(url('nro-cuentas.index')), { search: search.value }, {
     preserveState: true,
     replace: true,
   })
@@ -31,7 +32,7 @@ const eliminar = id => {
     confirmButtonText: 'Sí, eliminar',
   }).then(result => {
     if (result.isConfirmed) {
-      router.delete(route('nro-cuentas.destroy', id), {
+      router.delete(route(url('nro-cuentas.destroy'), id), {
         onSuccess: () => {
           Swal.fire('Eliminado', 'Registro eliminado.', 'success')
         }
@@ -55,7 +56,7 @@ const eliminar = id => {
           <div class="flex justify-between items-center">
             <h1 class="font-bold text-2xl">Listado de Números de Cuenta</h1>
             <Link
-              href="/nro-cuentas/create"
+              :href="url('nro-cuentas.create')"
               class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
               Nuevo
@@ -99,7 +100,7 @@ const eliminar = id => {
                   </td>
                   <td class="p-3 flex gap-2">
                     <Link
-                      :href="`/nro-cuentas/${c.id}/edit`"
+                      :href="url(`nro-cuentas/${c.id}/edit`)"
                       class="px-3 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition-colors"
                     >
                       Editar

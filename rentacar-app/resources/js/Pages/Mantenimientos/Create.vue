@@ -3,12 +3,13 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, router } from '@inertiajs/vue3';
 import Swal from 'sweetalert2';
 import { ref } from 'vue';
-
+import baseUrl from '@/composables/useBaseUrl';
+const { url } = baseUrl();
 const nombre = ref('');
 const descripcion = ref('');
 
 const enviar = () => {
-  router.post('/mantenimientos', {
+  router.post(url('/mantenimientos'), {
     nombre: nombre.value,
     descripcion: descripcion.value,
   }, {
@@ -19,7 +20,7 @@ const enviar = () => {
         icon: 'success',
         confirmButtonText: 'Aceptar',
       }).then(() => {
-        router.visit('/mantenimientos');
+        router.visit(url('/mantenimientos'));
       });
     },
     onError: () => {

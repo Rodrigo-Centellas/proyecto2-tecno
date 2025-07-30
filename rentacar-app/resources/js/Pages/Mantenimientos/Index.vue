@@ -3,7 +3,8 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import Swal from 'sweetalert2';
 import { ref, watch } from 'vue';
-
+import { useBaseUrl } from '@/composables/useBaseUrl';
+const { url } = useBaseUrl();
 const props = defineProps({
   mantenimientos: Array,
   filters: Object,
@@ -12,7 +13,7 @@ const props = defineProps({
 const search = ref(props.filters?.search || '');
 
 watch(search, val => {
-  router.get('/mantenimientos', { search: val }, { preserveState: true, replace: true });
+  router.get(url('/mantenimientos'), { search: val }, { preserveState: true, replace: true });
 });
 
 const eliminar = id => {
@@ -25,7 +26,7 @@ const eliminar = id => {
     cancelButtonText: 'Cancelar',
   }).then(result => {
     if (result.isConfirmed) {
-      router.delete(`/mantenimientos/${id}`, {
+      router.delete(url(`/mantenimientos/${id}`), {
         onSuccess: () => {
           Swal.fire('¡Eliminado!', 'El mantenimiento ha sido eliminado.', 'success');
         }
@@ -59,7 +60,7 @@ const eliminar = id => {
               Lista de Mantenimientos
             </h1>
             <Link
-              href="/mantenimientos/create"
+              :href="url('/mantenimientos/create')"
               class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium shadow-md transition-colors"
               style="font-size: calc(1em - 0.075rem);"
             >
@@ -76,7 +77,7 @@ const eliminar = id => {
               style="font-size: calc(1em - 0.075rem);"
             />
             <button
-              @click.prevent="router.get('/mantenimientos', { search: search }, { preserveState: true, replace: true })"
+              @click.prevent="router.get(url('/mantenimientos'), { search: search }, { preserveState: true, replace: true })"
               class="px-6 py-3 bg-gray-800 text-white rounded-lg hover:bg-gray-700 font-medium shadow-md transition-colors"
               style="font-size: calc(1em - 0.075rem);"
             >
@@ -106,7 +107,7 @@ const eliminar = id => {
                   <td class="px-4 py-3 border">
                     <div class="flex flex-wrap gap-3">
                       <Link
-                        :href="`/mantenimientos/${m.id}/edit`"
+                        :href="url(`/mantenimientos/${m.id}/edit`)"
                         class="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 font-medium transition-colors"
                         style="font-size: calc(1em - 0.075rem);"
                       >

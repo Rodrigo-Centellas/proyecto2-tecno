@@ -3,7 +3,8 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, router } from '@inertiajs/vue3';
 import Swal from 'sweetalert2';
 import { ref } from 'vue';
-
+import { useBaseUrl } from '@/composables/useBaseUrl'
+const { url } = useBaseUrl()
 const props = defineProps({
   users: Array,
   filters: Object,
@@ -22,7 +23,7 @@ const eliminar = (id) => {
   }).then(result => {
     if (result.isConfirmed) {
       processing.value = true;
-      router.delete(`/users/${id}`, {
+      router.delete(url(`/users/${id}`), {
         onSuccess: () => {
           Swal.fire('Eliminado', 'Usuario eliminado correctamente.', 'success');
         },
@@ -35,7 +36,7 @@ const eliminar = (id) => {
 };
 
 const buscar = () => {
-  router.get('/users', { search: search.value }, { preserveState: true, replace: true });
+  router.get(url('/users'), { search: search.value }, { preserveState: true, replace: true });
 };
 </script>
 
@@ -58,7 +59,7 @@ const buscar = () => {
               Lista de Usuarios
             </h1>
             <a
-              href="/users/create"
+              :href="url('/users/create')"
               class="mt-4 sm:mt-0 px-6 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-md"
               style="font-size: inherit;"
             >
@@ -128,7 +129,7 @@ const buscar = () => {
                     <div class="flex flex-wrap items-center gap-3">
                       <!-- Ver -->
                       <a
-                        :href="`/users/${user.id}`"
+                        :href="url(`/users/${user.id}`)"
                         class="inline-flex items-center px-4 py-2 text-xs font-medium bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
                         style="font-size: calc(0.875em);"
                       >
@@ -136,7 +137,7 @@ const buscar = () => {
                       </a>
                       <!-- Editar -->
                       <a
-                        :href="`/users/${user.id}/edit`"
+                        :href="url(`/users/${user.id}/edit`)"
                         class="inline-flex items-center px-4 py-2 text-xs font-medium bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors"
                         style="font-size: calc(0.875em);"
                       >

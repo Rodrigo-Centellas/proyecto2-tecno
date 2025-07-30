@@ -3,7 +3,8 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, router } from '@inertiajs/vue3';
 import { ref } from 'vue';
 import Swal from 'sweetalert2';
-
+import { useBaseUrl } from '@/composables/useBaseUrl'
+const { url } = useBaseUrl()
 const props = defineProps({
     permissions: Array,
 });
@@ -12,7 +13,7 @@ const name = ref('');
 const selectedPermissions = ref([]);
 
 const enviar = () => {
-    router.post('/roles', {
+    router.post(url('/roles'), {
         name: name.value,
         permissions: selectedPermissions.value,
     }, {
@@ -22,7 +23,7 @@ const enviar = () => {
                 text: 'El rol fue registrado correctamente.',
                 icon: 'success',
             }).then(() => {
-                router.visit('/roles');
+                router.visit(url('/roles'));
             });
         },
         onError: (errors) => {

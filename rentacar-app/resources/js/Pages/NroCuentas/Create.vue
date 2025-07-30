@@ -1,6 +1,8 @@
 <script setup>
 import { Head, useForm, Link } from '@inertiajs/vue3'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
+import { useBaseUrl } from '@/composables/useBaseUrl'
+const { url } = useBaseUrl()
 
 const form = useForm({
   banco: '',
@@ -8,7 +10,7 @@ const form = useForm({
   es_activa: 1, // por defecto activa
 })
 
-const submit = () => form.post(route('nro-cuentas.store'))
+const submit = () => form.post(route(url('nro-cuentas.store')))
 </script>
 
 <template>
@@ -79,7 +81,7 @@ const submit = () => form.post(route('nro-cuentas.store'))
               <button type="submit" class="px-6 py-3 bg-green-600 text-white rounded-lg">
                 Guardar
               </button>
-              <Link href="{ route('nro-cuentas.index') }" class="underline">
+              <Link :href="url('nro-cuentas.index')" class="underline">
                 Cancelar
               </Link>
             </div>

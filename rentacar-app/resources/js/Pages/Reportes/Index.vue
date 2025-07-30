@@ -1,6 +1,8 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link } from '@inertiajs/vue3';
+import { useBaseUrl } from '@/composables/useBaseUrl'
+const { url } = useBaseUrl()
 </script>
 
 <template>
@@ -19,7 +21,7 @@ import { Head, Link } from '@inertiajs/vue3';
           <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             <!-- Tarjeta: Reporte de Pagos -->
             <Link
-              href="/reportes/pagos"
+              :href="url('/reportes/pagos')"
               class="block p-6 bg-white border border-gray-200 rounded-lg shadow card-bg"
               style="text-decoration: none;"
             >
@@ -33,7 +35,7 @@ import { Head, Link } from '@inertiajs/vue3';
 
             <!-- Tarjeta adicional: Ejemplo -->
             <Link
-              href="/reportes/otro"
+              :href="url('/reportes/otro')"
               class="block p-6 bg-white border border-gray-200 rounded-lg shadow card-bg"
               style="text-decoration: none;"
             >

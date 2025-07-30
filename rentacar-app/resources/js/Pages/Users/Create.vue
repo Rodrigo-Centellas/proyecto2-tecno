@@ -3,7 +3,8 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, router } from '@inertiajs/vue3';
 import { ref } from 'vue';
 import Swal from 'sweetalert2';
-
+import { useBaseUrl } from '@/composables/useBaseUrl'
+const { url } = useBaseUrl()
 const name = ref('');
 const apellido = ref('');
 const ci = ref('');
@@ -20,8 +21,8 @@ const props = defineProps({
 
 const enviar = () => {
     processing.value = true;
-    
-    router.post('/users', {
+
+    router.post(url('/users'), {
         name: name.value,
         apellido: apellido.value,
         ci: ci.value,
@@ -37,7 +38,7 @@ const enviar = () => {
                 text: 'El usuario ha sido registrado correctamente.',
                 icon: 'success',
             }).then(() => {
-                router.visit('/users');
+                router.visit(url('/users'));
             });
         },
         onFinish: () => {
@@ -260,7 +261,7 @@ const enviar = () => {
                             </button>
                             
                             <a 
-                                href="/users" 
+                                :href="url('/users')" 
                                 class="px-8 py-3 text-white bg-gray-500 rounded-lg hover:bg-gray-600 transition-colors font-medium shadow-md hover:shadow-lg text-center"
                                 style="font-size: inherit;">
                                 Cancelar

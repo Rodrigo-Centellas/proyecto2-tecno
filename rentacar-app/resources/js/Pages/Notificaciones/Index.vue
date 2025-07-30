@@ -1,8 +1,10 @@
 <script setup>
+import { useBaseUrl } from '@/composables/useBaseUrl';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, router } from '@inertiajs/vue3';
 import { ref, watch, computed } from 'vue';
-
+import useBaseUrl from '@/composables/useBaseUrl';
+const { url } = useBaseUrl();
 const props = defineProps({
   notificaciones: {
     type: Object, // Cambiado a Object porque viene paginado
@@ -30,7 +32,7 @@ const notificacionesSeguras = computed(() => {
 });
 
 watch(search, (val) => {
-  router.get('/notificaciones', { search: val }, { preserveState: true, replace: true });
+  router.get(url('/notificaciones'), { search: val }, { preserveState: true, replace: true });
 });
 </script>
 

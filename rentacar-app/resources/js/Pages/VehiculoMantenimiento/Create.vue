@@ -3,7 +3,8 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, router } from '@inertiajs/vue3';
 import { ref } from 'vue';
 import Swal from 'sweetalert2';
-
+import { useBaseUrl } from '@/composables/useBaseUrl'
+const { url } = useBaseUrl()
 const props = defineProps({
     vehiculos: Array,
     mantenimientos: Array,
@@ -17,8 +18,8 @@ const processing = ref(false);
 
 const enviar = () => {
     processing.value = true;
-    
-    router.post('/registro-mantenimientos', {
+
+    router.post(url('/registro-mantenimientos'), {
         vehiculo_id: vehiculo_id.value,
         mantenimiento_id: mantenimiento_id.value,
         fecha: fecha.value,
@@ -30,7 +31,7 @@ const enviar = () => {
                 text: 'El mantenimiento fue registrado correctamente.',
                 icon: 'success',
             }).then(() => {
-                router.visit('/registro-mantenimientos');
+                router.visit(url('/registro-mantenimientos'));
             });
         },
         onFinish: () => {
@@ -160,7 +161,7 @@ const enviar = () => {
                             </button>
                             
                             <a 
-                                href="/registro-mantenimientos" 
+                                :href="url('/registro-mantenimientos')" 
                                 class="px-8 py-3 text-white bg-gray-500 rounded-lg hover:bg-gray-600 transition-colors font-medium shadow-md hover:shadow-lg text-center"
                                 style="font-size: inherit;">
                                 Cancelar

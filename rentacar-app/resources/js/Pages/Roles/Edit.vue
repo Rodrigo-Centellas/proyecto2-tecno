@@ -3,7 +3,8 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, router } from '@inertiajs/vue3';
 import { ref } from 'vue';
 import Swal from 'sweetalert2';
-
+import { useBaseUrl } from '@/composables/useBaseUrl'
+const { url } = useBaseUrl()
 const props = defineProps({
   role: Object,
   permissions: Array,
@@ -15,7 +16,7 @@ const processing = ref(false);
 
 const enviar = () => {
   processing.value = true;
-  router.put(`/roles/${props.role.id}`, {
+  router.put(url(`/roles/${props.role.id}`), {
     name: name.value,
     permissions: permisosSeleccionados.value,
   }, {
@@ -25,7 +26,7 @@ const enviar = () => {
         text: 'El rol ha sido modificado correctamente.',
         icon: 'success',
       }).then(() => {
-        router.visit('/roles');
+        router.visit(url('/roles'));
       });
     },
     onFinish: () => {
@@ -118,7 +119,7 @@ const enviar = () => {
                 <span v-else>Guardar Cambios</span>
               </button>
               <a
-                href="/roles"
+                :href="url('/roles')"
                 class="px-8 py-3 text-white bg-gray-500 rounded-lg hover:bg-gray-600 transition-colors font-medium shadow-md hover:shadow-lg text-center"
                 style="font-size: inherit;"
               >

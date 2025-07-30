@@ -3,6 +3,8 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, router } from '@inertiajs/vue3';
 import Swal from 'sweetalert2';
 import { ref, watch } from 'vue';
+import { useBaseUrl } from '@/composables/useBaseUrl';
+const { url } = useBaseUrl();
 
 const props = defineProps({
   mantenimiento: Object,
@@ -17,7 +19,7 @@ watch(() => props.mantenimiento, newVal => {
 });
 
 const actualizar = () => {
-  router.put(`/mantenimientos/${props.mantenimiento.id}`, {
+  router.put(url(`/mantenimientos/${props.mantenimiento.id}`), {
     nombre: nombre.value,
     descripcion: descripcion.value,
   }, {

@@ -3,7 +3,8 @@ import { ref, watch, computed } from 'vue';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, router, usePage } from '@inertiajs/vue3';
 import Swal from 'sweetalert2';
-
+import { useBaseUrl } from '@/composables/useBaseUrl'
+const { url } = useBaseUrl()
 const props = defineProps({
     registros: Array,
     filters: Object,
@@ -21,7 +22,7 @@ const search = ref(props.filters?.search || '');
 
 // Escucha cambios en el input y realiza la consulta GET con filtro
 watch(search, (val) => {
-    router.get('/registro-mantenimientos', { search: val }, { preserveState: true, replace: true });
+    router.get(url('/registro-mantenimientos'), { search: val }, { preserveState: true, replace: true });
 });
 
 const eliminar = (id) => {
@@ -34,7 +35,7 @@ const eliminar = (id) => {
         cancelButtonText: 'Cancelar',
     }).then((result) => {
         if (result.isConfirmed) {
-            router.delete(`/registro-mantenimientos/${id}`);
+            router.delete(url(`/registro-mantenimientos/${id}`));
         }
     });
 };
@@ -64,7 +65,7 @@ const eliminar = (id) => {
                             </p>
                         </div>
                         <a v-if="hasPermission('mantenimientos.crear')"
-                           href="/registro-mantenimientos/create" 
+                           :href="url('/registro-mantenimientos/create')" 
                            class="px-4 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600 transition-colors font-medium shadow-md hover:shadow-lg"
                            style="font-size: calc(1em - 0.125rem);">
                             ✅ Nuevo Registro
