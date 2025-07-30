@@ -95,19 +95,19 @@ const eliminar = (id) => {
                                         ID
                                     </th>
                                     <th class="px-4 py-3 border text-left text-main font-semibold" style="font-size: calc(1em - 0.125rem);">
-                                        🚗 Vehículo
+                                         Vehículo
                                     </th>
                                     <th class="px-4 py-3 border text-left text-main font-semibold" style="font-size: calc(1em - 0.125rem);">
-                                        🔧 Mantenimiento
+                                         Mantenimiento
                                     </th>
                                     <th class="px-4 py-3 border text-left text-main font-semibold" style="font-size: calc(1em - 0.125rem);">
-                                        📅 Fecha
+                                         Fecha
                                     </th>
                                     <th class="px-4 py-3 border text-left text-main font-semibold" style="font-size: calc(1em - 0.125rem);">
-                                        💰 Monto
+                                         Monto
                                     </th>
                                     <th class="px-4 py-3 border text-left text-main font-semibold" style="font-size: calc(1em - 0.125rem);">
-                                        ⚙️ Acciones
+                                         Acciones
                                     </th>
                                 </tr>
                             </thead>
@@ -142,25 +142,25 @@ const eliminar = (id) => {
                                     <td class="px-4 py-3">
                                         <div class="flex space-x-2">
                                             <a v-if="hasPermission('mantenimientos.ver')"
-                                               :href="`/registro-mantenimientos/${r.id}`"
+                                               :href="url(`/registro-mantenimientos/${r.id}`)"
                                                class="text-blue-500 hover:underline"
                                                title="Ver detalles"
                                                style="font-size: calc(1em - 0.125rem);">
-                                                👁️ Ver
+                                                 Ver
                                             </a>
                                             <a v-if="hasPermission('mantenimientos.editar')"
-                                               :href="`/registro-mantenimientos/${r.id}/edit`"
+                                               :href="url(`/registro-mantenimientos/${r.id}/edit`)"
                                                class="text-yellow-500 hover:underline"
                                                title="Editar registro"
                                                style="font-size: calc(1em - 0.125rem);">
-                                                ✏️ Editar
+                                                 Editar
                                             </a>
                                             <button v-if="hasPermission('mantenimientos.eliminar')" 
                                                     @click="eliminar(r.id)" 
                                                     class="text-red-500 hover:underline"
                                                     title="Eliminar registro"
                                                     style="font-size: calc(1em - 0.125rem);">
-                                                🗑️ Eliminar
+                                                 Eliminar
                                             </button>
                                         </div>
                                     </td>
@@ -190,7 +190,7 @@ const eliminar = (id) => {
                     <div class="mt-6 p-4 card-bg rounded-lg border border-opacity-20 border-gray-300">
                         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center">
                             <div class="text-main opacity-70" style="font-size: calc(1em - 0.125rem);">
-                                📊 Total de registros: <span class="font-semibold">{{ registros.length }}</span>
+                                 Total de registros: <span class="font-semibold">{{ registros.length }}</span>
                             </div>
                             <div class="text-main opacity-60 mt-2 sm:mt-0" style="font-size: calc(1em - 0.2rem);">
                                 Última actualización: {{ new Date().toLocaleString('es-BO') }}

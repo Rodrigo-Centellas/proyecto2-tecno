@@ -30,7 +30,7 @@ const actualizar = () => {
         icon: 'success',
         confirmButtonText: 'Aceptar',
       }).then(() => {
-        router.visit('/mantenimientos');
+        router.visit(url('/mantenimientos'));
       });
     },
     onError: () => {

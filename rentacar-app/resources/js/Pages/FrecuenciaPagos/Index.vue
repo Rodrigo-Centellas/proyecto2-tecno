@@ -14,7 +14,7 @@ const props = defineProps({
 const search = ref(props.filters?.search || '');
 
 watch(search, val => {
-  router.get('/frecuencia-pagos', { search: val }, { preserveState: true, replace: true });
+  router.get(url('/frecuencia-pagos'), { search: val }, { preserveState: true, replace: true });
 });
 
 const eliminar = id => {

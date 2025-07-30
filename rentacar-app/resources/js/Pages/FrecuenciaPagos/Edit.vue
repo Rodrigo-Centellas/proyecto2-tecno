@@ -31,7 +31,7 @@ const enviar = () => {
         icon: 'success',
         confirmButtonText: 'Aceptar',
       }).then(() => {
-        router.visit('/frecuencia-pagos');
+        router.visit(url('/frecuencia-pagos'));
       });
     },
     onError: () => {
