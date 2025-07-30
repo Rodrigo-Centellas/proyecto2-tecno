@@ -3,12 +3,13 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, router } from '@inertiajs/vue3';
 import Swal from 'sweetalert2';
 import { ref } from 'vue';
-
+import { useBaseUrl } from '@/composables/useBaseUrl';
+const { url } = useBaseUrl();
 const nombre = ref('');
 const frecuencia_dias = ref('');
 
 const enviar = () => {
-  router.post('/frecuencia-pagos', {
+  router.post(url('/frecuencia-pagos'), {
     nombre: nombre.value,
     frecuencia_dias: frecuencia_dias.value,
   }, {
@@ -19,7 +20,7 @@ const enviar = () => {
         icon: 'success',
         confirmButtonText: 'Aceptar',
       }).then(() => {
-        router.visit('/frecuencia-pagos');
+        router.visit(url('/frecuencia-pagos'));
       });
     },
     onError: () => {

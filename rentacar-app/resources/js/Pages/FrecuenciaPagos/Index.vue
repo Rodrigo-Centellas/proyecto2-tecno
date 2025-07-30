@@ -27,7 +27,7 @@ const eliminar = id => {
     cancelButtonText: 'Cancelar',
   }).then(result => {
     if (result.isConfirmed) {
-      router.delete(`/frecuencia-pagos/${id}`, {
+      router.delete(url(`/frecuencia-pagos/${id}`), {
         onSuccess: () => {
           Swal.fire('Eliminado', 'Frecuencia de pago eliminada correctamente.', 'success');
         }
