@@ -155,46 +155,48 @@ const closeImage = () => {
         </section>
 
         <!-- Documentos -->
-        <section class="rounded-lg shadow-lg card-bg overflow-hidden">
-          <header class="px-6 py-3 border-b border-opacity-20">
-            <h3 class="font-semibold" style="font-size: calc(1em + 0.125rem);">
-              📄 Documentos
-            </h3>
-          </header>
-          <div class="p-6">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <template v-for="doc in [
-                { label: 'Documento Frontal', path: user.documento_frontal_path },
-                { label: 'Documento Trasero', path: user.documento_trasero_path },
-              ]" :key="doc.label">
-                <div class="text-center">
-                  <label class="block font-medium mb-3" style="font-size: calc(1em - 0.075rem);">
-                    {{ doc.label }}
-                  </label>
-                  <div v-if="doc.path" class="space-y-2">
-                    <img
-                      :src="`/storage/${doc.path}`"
-                      :alt="doc.label"
-                      class="w-full max-w-xs mx-auto rounded-lg border shadow-sm hover:shadow-md transition-shadow cursor-pointer"
-                      @click="openImage(doc.path)"
-                    />
-                    <p class="text-xs text-gray-500">Click para ampliar</p>
-                  </div>
-                  <div
-                    v-else
-                    class="flex flex-col items-center justify-center h-32 rounded-lg border-2 border-dashed border-gray-300 bg-gray-50"
-                  >
-                    <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                    <span class="text-sm text-gray-500">No subido</span>
-                  </div>
-                </div>
-              </template>
+  <section class="rounded-lg shadow-lg card-bg overflow-hidden">
+    <header class="px-6 py-3 border-b border-opacity-20">
+      <h3 class="font-semibold" style="font-size: calc(1em + 0.125rem);">
+        📄 Documentos
+      </h3>
+    </header>
+    <div class="p-6">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <template
+          v-for="doc in [
+            { label: 'Documento Frontal', path: props.user.documento_frontal_path },
+            { label: 'Documento Trasero',  path: props.user.documento_trasero_path  },
+          ]"
+          :key="doc.label"
+        >
+          <div class="text-center">
+            <label class="block font-medium mb-3" style="font-size: calc(1em - 0.075rem);">
+              {{ doc.label }}
+            </label>
+
+            <div v-if="doc.path" class="space-y-2">
+              <img
+                :src="url(`/storage/${doc.path}`)"
+                :alt="doc.label"
+                class="w-full max-w-xs mx-auto rounded-lg border shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+                @click="openImage(doc.path)"
+              />
+              <p class="text-xs text-gray-500">Click para ampliar</p>
+            </div>
+
+            <div v-else class="flex flex-col items-center justify-center h-32 rounded-lg border-2 border-dashed border-gray-300 bg-gray-50">
+              <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              <span class="text-sm text-gray-500">No subido</span>
             </div>
           </div>
-        </section>
+        </template>
+      </div>
+    </div>
+  </section>
 
         <!-- Información del Sistema -->
         <section class="rounded-lg shadow-lg card-bg overflow-hidden">
@@ -237,16 +239,16 @@ const closeImage = () => {
     </div>
 
     <!-- Modal / Lightbox -->
-    <div
-      v-if="selectedImage"
-      class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50"
-      @click="closeImage"
-    >
-      <img
-        :src="`/storage/${selectedImage}`"
-        alt="Ampliado"
-        class="max-w-full max-h-full rounded-lg shadow-lg"
-      />
-    </div>
+  <div
+    v-if="selectedImage"
+    class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50"
+    @click="closeImage"
+  >
+    <img
+      :src="url(`/storage/${selectedImage}`)"
+      alt="Ampliado"
+      class="max-w-full max-h-full rounded-lg shadow-lg"
+    />
+  </div>
   </AuthenticatedLayout>
 </template>
