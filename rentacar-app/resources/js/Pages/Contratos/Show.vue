@@ -1,7 +1,8 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link } from '@inertiajs/vue3';
-
+import { useBaseUrl } from '@/composables/useBaseUrl'
+const { url } = useBaseUrl()
 // Importar estilos CSS para impresión
 import '../../../css/contrato-print.css';
 
@@ -22,7 +23,7 @@ const imprimirContrato = () => {
     <template #header>
       <div class="flex items-center justify-between no-print">
         <div class="flex items-center space-x-3">
-          <Link href="/contratos" class="text-gray-500 hover:text-gray-700">
+          <Link :href="url('/contratos')" class="text-gray-500 hover:text-gray-700">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
             </svg>
@@ -43,8 +44,8 @@ const imprimirContrato = () => {
             </svg>
             <span>Imprimir</span>
           </button>
-          
-          <Link :href="`/contratos/${contrato.id}/edit`"
+
+          <Link :href="url(`/contratos/${contrato.id}/edit`)"
                 class="bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600 transition-colors flex items-center space-x-2">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>

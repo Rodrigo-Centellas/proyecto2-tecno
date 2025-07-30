@@ -6,7 +6,8 @@ import Swal from 'sweetalert2';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import 'dayjs/locale/es';
-
+import { useBaseUrl } from '@/composables/useBaseUrl'
+const { url } = useBaseUrl()
 dayjs.extend(relativeTime);
 dayjs.locale('es');
 
@@ -26,7 +27,7 @@ const hasPermission = computed(() => (permission) => {
 const search = ref(props.filters?.search || '');
 
 watch(search, (val) => {
-  router.get('/contratos', { search: val }, { preserveState: true, replace: true });
+  router.get(url('/contratos'), { search: val }, { preserveState: true, replace: true });
 });
 
 const eliminar = (id) => {
@@ -40,7 +41,7 @@ const eliminar = (id) => {
     confirmButtonColor: '#dc2626',
   }).then(result => {
     if (result.isConfirmed) {
-      router.delete(`/contratos/${id}`, {
+      router.delete(url(`/contratos/${id}`), {
         onSuccess: () => Swal.fire('Eliminado', 'Contrato eliminado correctamente', 'success'),
         onError: () => Swal.fire('Error', 'No se pudo eliminar el contrato', 'error'),
       });
@@ -114,7 +115,7 @@ const estadisticas = computed(() => {
           </div>
           <h2 class="text-2xl font-bold text-gray-900">Gestión de Contratos</h2>
         </div>
-        <Link href="/contratos/create"
+        <Link :href="url('/contratos/create')"
           class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center space-x-2">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
@@ -224,7 +225,7 @@ const estadisticas = computed(() => {
             </svg>
             <h3 class="text-lg font-medium text-gray-900 mb-2">No hay contratos</h3>
             <p class="text-gray-500 mb-4">Comienza creando tu primer contrato de alquiler</p>
-            <Link href="/contratos/create"
+            <Link :href="url('/contratos/create')"
               class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6">
@@ -315,7 +316,7 @@ const estadisticas = computed(() => {
 
                 <!-- Acciones -->
                 <div class="flex flex-col sm:flex-row gap-2 lg:ml-6">
-                  <Link :href="`/contratos/${contrato.id}`"
+                  <Link :href="url(`/contratos/${contrato.id}`)"
                     class="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium">
                   <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -327,7 +328,7 @@ const estadisticas = computed(() => {
                   Ver Detalles
                   </Link>
 
-                  <Link v-if="hasPermission('contratos.editar')" :href="`/contratos/${contrato.id}/edit`"
+                  <Link v-if="hasPermission('contratos.editar')" :href="url(`/contratos/${contrato.id}/edit`)"
                     class="inline-flex items-center justify-center px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors text-sm font-medium">
                   <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

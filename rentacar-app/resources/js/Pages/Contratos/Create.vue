@@ -5,6 +5,9 @@ import { ref, computed } from 'vue';
 import Swal from 'sweetalert2';
 import { useForm } from '@inertiajs/vue3';
 import dayjs from 'dayjs';
+import { useBaseUrl } from '@/composables/useBaseUrl'
+const { url } = useBaseUrl()
+
 
 const props = defineProps({
   vehiculos: Array,
@@ -133,14 +136,14 @@ const enviar = () => {
     return;
   }
 
-  form.post('/contratos', {
+  form.post(url('/contratos'), {
     onSuccess: () => {
       Swal.fire({
         title: '¡Contrato creado exitosamente!',
         text: 'Se ha generado el pago de garantía. Proceda al área de pagos.',
         icon: 'success',
         confirmButtonColor: '#10B981'
-      }).then(() => router.visit('/contratos'));
+      }).then(() => router.visit(url('/contratos')));
     },
     onError: (errors) => {
       console.log('Errores:', errors);
