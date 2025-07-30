@@ -3,8 +3,8 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, router } from '@inertiajs/vue3';
 import Swal from 'sweetalert2';
 import { ref } from 'vue';
-import baseUrl from '@/composables/useBaseUrl';
-const { url } = baseUrl();
+import { useBaseUrl } from '@/composables/useBaseUrl';
+const { url } = useBaseUrl();
 const nombre = ref('');
 const descripcion = ref('');
 
