@@ -62,7 +62,7 @@ const enviar = () => {
 };
 
 const actualizarContrato = () => {
-  router.put(url`/contratos/${props.contrato.id}`, {
+  router.put(url(`/contratos/${props.contrato.id}`), {
     estado: estado.value,
     fecha_fin: fecha_fin.value, // Solo si realmente es necesario permitir este cambio
   }, {
