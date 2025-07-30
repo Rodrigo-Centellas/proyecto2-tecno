@@ -2,6 +2,8 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import Swal from 'sweetalert2';
+import { useBaseUrl } from '@/composables/useBaseUrl';
+const { url } = useBaseUrl();
 import { ref, watch } from 'vue';
 
 const props = defineProps({
@@ -59,7 +61,7 @@ const eliminar = id => {
               Listado de Frecuencias de Pago
             </h1>
             <Link
-              href="/frecuencia-pagos/create"
+              :href="url('/frecuencia-pagos/create')"
               class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium shadow-md transition-colors"
               style="font-size: calc(1em - 0.075rem);"
             >
@@ -106,7 +108,7 @@ const eliminar = id => {
                   <td class="px-4 py-3 border">
                     <div class="flex flex-wrap gap-3">
                       <Link
-                        :href="`/frecuencia-pagos/${f.id}/edit`"
+                        :href="url(`/frecuencia-pagos/${f.id}/edit`)"
                         class="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 font-medium transition-colors"
                         style="font-size: calc(1em - 0.075rem);"
                       >
