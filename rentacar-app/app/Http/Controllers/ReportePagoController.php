@@ -5,53 +5,90 @@ namespace App\Http\Controllers;
 use App\Models\Pago;
 use App\Models\User;
 use App\Models\Vehiculo;
-use App\Models\Contrato;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use PDF;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\PagosExport;
+use Illuminate\Support\Facades\Auth;
 
 class ReportePagoController extends Controller
 {
     public function index(Request $request)
     {
-        // Obtener datos para los filtros
-        $usuarios = User::select('id', 'name', 'apellido')
-            ->whereHas('contratos')
-            ->orWhereHas('reservas')
-            ->orderBy('name')
-            ->get()
-            ->map(function ($user) {
-                return [
+        $user = Auth::user();
+
+        // Usuarios para filtros
+        if ($user->hasRole('Cliente')) {
+            // Solo él mismo
+            $usuarios = collect([
+                [
                     'id' => $user->id,
-                    'nombre_completo' => $user->name . ' ' . $user->apellido
-                ];
-            });
+                    'nombre_completo' => $user->name . ' ' . $user->apellido,
+                ]
+            ]);
+        } else {
+            $usuarios = User::select('id', 'name', 'apellido')
+                ->whereHas('contratos')
+                ->orWhereHas('reservas')
+                ->orderBy('name')
+                ->get()
+                ->map(function ($user) {
+                    return [
+                        'id' => $user->id,
+                        'nombre_completo' => $user->name . ' ' . $user->apellido,
+                    ];
+                });
+        }
 
-        $vehiculos = Vehiculo::select('id', 'tipo', 'marca', 'modelo', 'placa')
-            ->orderBy('tipo')
-            ->get()
-            ->map(function ($vehiculo) {
-                return [
-                    'id' => $vehiculo->id,
-                    'descripcion' => $vehiculo->tipo . ' - ' . $vehiculo->marca . ' ' . $vehiculo->modelo . ' (' . $vehiculo->placa . ')'
-                ];
-            });
+        // Vehículos para filtros
+        if ($user->hasRole('Cliente')) {
+            // Vehículos de sus contratos o reservas
+            $vehiculosQuery = Vehiculo::query()
+                ->whereHas('contratos.users', function ($q) use ($user) {
+                    $q->where('user_id', $user->id);
+                })
+                ->orWhereHas('reservas', function ($q) use ($user) {
+                    $q->where('user_id', $user->id);
+                });
 
-        // Tipos de contrato únicos
-        $tiposContrato = Pago::select('estado')
+            $vehiculos = $vehiculosQuery
+                ->select('id', 'tipo', 'marca', 'modelo', 'placa')
+                ->orderBy('tipo')
+                ->get()
+                ->map(function ($vehiculo) {
+                    return [
+                        'id' => $vehiculo->id,
+                        'descripcion' => $vehiculo->tipo . ' - ' . $vehiculo->marca . ' ' . $vehiculo->modelo . ' (' . $vehiculo->placa . ')',
+                    ];
+                });
+        } else {
+            $vehiculos = Vehiculo::select('id', 'tipo', 'marca', 'modelo', 'placa')
+                ->orderBy('tipo')
+                ->get()
+                ->map(function ($vehiculo) {
+                    return [
+                        'id' => $vehiculo->id,
+                        'descripcion' => $vehiculo->tipo . ' - ' . $vehiculo->marca . ' ' . $vehiculo->modelo . ' (' . $vehiculo->placa . ')',
+                    ];
+                });
+        }
+
+        // Tipos de pago únicos (para filtro)
+        $tiposPago = Pago::select('tipo_pago')
             ->distinct()
-            ->whereNotNull('estado')
-            ->pluck('estado')
+            ->pluck('tipo_pago')
             ->sort()
             ->values();
 
         return Inertia::render('Reportes/Pagos', [
             'usuarios' => $usuarios,
             'vehiculos' => $vehiculos,
-            'tiposContrato' => $tiposContrato,
-            'filters' => $request->only(['desde', 'hasta', 'usuario_id', 'vehiculo_id', 'tipo_pago', 'estado', 'estado'])
+            'tiposContrato' => $tiposPago, // reutiliza la prop en Vue como tiposContrato para lista de tipo_pago
+            'filters' => $request->only([
+                'desde', 'hasta', 'usuario_id', 'vehiculo_id',
+                'tipo_pago', 'metodo_pago', 'estado'
+            ])
         ]);
     }
 
@@ -71,12 +108,25 @@ class ReportePagoController extends Controller
 
     private function filtrarPagos(Request $request)
     {
+        $user = Auth::user();
+
         $query = Pago::with([
             'contrato.vehiculo',
             'contrato.users',
-            'reserva.vehiculo', 
+            'reserva.vehiculo',
             'reserva.user'
         ]);
+
+        // Si es cliente, restringir a sus pagos
+        if ($user->hasRole('Cliente')) {
+            $query->where(function ($q) use ($user) {
+                $q->whereHas('contrato.users', function ($subQ) use ($user) {
+                    $subQ->where('user_id', $user->id);
+                })->orWhereHas('reserva', function ($subQ) use ($user) {
+                    $subQ->where('user_id', $user->id);
+                });
+            });
+        }
 
         // Filtro por fechas
         if ($request->desde && $request->hasta) {
@@ -114,11 +164,9 @@ class ReportePagoController extends Controller
             $query->where('tipo_pago', $request->tipo_pago);
         }
 
-        // Filtro por tipo de contrato
-        if ($request->tipo_contrato) {
-            $query->whereHas('contrato', function ($subQ) use ($request) {
-                $subQ->where('tipo_contrato', $request->tipo_contrato);
-            });
+        // Filtro por método de pago
+        if ($request->metodo_pago) {
+            $query->where('metodo_pago', $request->metodo_pago);
         }
 
         // Filtro por estado
@@ -135,10 +183,11 @@ class ReportePagoController extends Controller
                             'fecha' => $pago->fecha,
                             'monto' => $pago->monto,
                             'tipo_pago' => $pago->tipo_pago,
+                            'metodo_pago' => $pago->metodo_pago ?? 'qr',
                             'estado' => $pago->estado,
                             'usuario' => $this->obtenerUsuarioPago($pago),
                             'vehiculo' => $this->obtenerVehiculoPago($pago),
-                            'tipo_contrato' => $this->obtenerTipoContrato($pago),
+                            'fuente' => $this->obtenerFuentePago($pago),
                             'transaction_id' => $pago->pagofacil_transaction_id,
                             'created_at' => $pago->created_at
                         ];
@@ -151,74 +200,76 @@ class ReportePagoController extends Controller
             $user = $pago->contrato->users->first();
             return $user->name . ' ' . $user->apellido;
         }
-        
+
         if ($pago->reserva && $pago->reserva->user) {
             return $pago->reserva->user->name . ' ' . $pago->reserva->user->apellido;
         }
-        
+
         return 'N/A';
     }
 
     private function obtenerVehiculoPago($pago)
     {
         $vehiculo = null;
-        
+
         if ($pago->contrato && $pago->contrato->vehiculo) {
             $vehiculo = $pago->contrato->vehiculo;
         } elseif ($pago->reserva && $pago->reserva->vehiculo) {
             $vehiculo = $pago->reserva->vehiculo;
         }
-        
+
         if ($vehiculo) {
             return $vehiculo->tipo . ' - ' . $vehiculo->marca . ' ' . $vehiculo->modelo . ' (' . $vehiculo->placa . ')';
         }
-        
+
         return 'N/A';
     }
 
-    private function obtenerTipoContrato($pago)
+    private function obtenerFuentePago($pago)
     {
-        if ($pago->contrato && $pago->contrato->tipo_contrato) {
-            return $pago->contrato->tipo_contrato;
+        if ($pago->contrato) {
+            return 'Contrato';
         }
-        
-        return $pago->tipo_pago === 'reserva' ? 'Reserva' : 'N/A';
+        if ($pago->reserva) {
+            return 'Reserva';
+        }
+        return 'N/A';
     }
 
     private function obtenerFiltrosAplicados(Request $request)
     {
         $filtros = [];
-        
+
         if ($request->desde) {
             $filtros['Desde'] = $request->desde;
         }
-        
+
         if ($request->hasta) {
             $filtros['Hasta'] = $request->hasta;
         }
-        
+
         if ($request->usuario_id) {
             $user = User::find($request->usuario_id);
             $filtros['Usuario'] = $user ? $user->name . ' ' . $user->apellido : 'N/A';
         }
-        
+
         if ($request->vehiculo_id) {
             $vehiculo = Vehiculo::find($request->vehiculo_id);
             $filtros['Vehículo'] = $vehiculo ? $vehiculo->tipo . ' - ' . $vehiculo->placa : 'N/A';
         }
-        
+
         if ($request->tipo_pago) {
             $filtros['Tipo de Pago'] = ucfirst($request->tipo_pago);
         }
-        
-        if ($request->tipo_contrato) {
-            $filtros['Tipo de Contrato'] = $request->tipo_contrato;
+
+        if ($request->metodo_pago) {
+            $filtros['Método de Pago'] = ucfirst($request->metodo_pago);
         }
-        
+
         if ($request->estado) {
             $filtros['Estado'] = ucfirst($request->estado);
         }
-        
+
         return $filtros;
     }
 }

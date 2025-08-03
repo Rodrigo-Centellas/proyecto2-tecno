@@ -3,8 +3,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, router } from '@inertiajs/vue3';
 import { ref } from 'vue';
 import Swal from 'sweetalert2';
-import { useBaseUrl } from '@/composables/useBaseUrl'
-const { url } = useBaseUrl()
+
 const props = defineProps({
     user: Object,
     roles: Array,
@@ -17,12 +16,13 @@ const domicilio = ref(props.user.domicilio);
 const telefono = ref(props.user.telefono);
 const email = ref(props.user.email);
 const selectedRoles = ref(props.user.roles.map(r => r.name));
+const verificado = ref(props.user.verificado || 'pendiente');
 const processing = ref(false);
 
 const enviar = () => {
     processing.value = true;
 
-    router.put(url(`/users/${props.user.id}`), {
+    router.put(`/users/${props.user.id}`, {
         name: name.value,
         apellido: apellido.value,
         ci: ci.value,
@@ -30,14 +30,15 @@ const enviar = () => {
         telefono: telefono.value,
         email: email.value,
         roles: selectedRoles.value,
+        verificado: verificado.value,
     }, {
         onSuccess: () => {
             Swal.fire({
-                title: '¡Usuario actualizado!',
+                title: 'Usuario actualizado',
                 text: 'Los datos del usuario fueron actualizados correctamente.',
                 icon: 'success',
             }).then(() => {
-                router.visit(url('/users'));
+                router.visit('/users');
             });
         },
         onFinish: () => {
@@ -58,7 +59,6 @@ const enviar = () => {
         <div class="py-12 text-main">
             <div class="mx-auto max-w-4xl sm:px-6 lg:px-8">
                 <div class="p-8 rounded-lg shadow-lg card-bg">
-                    <!-- Título del formulario -->
                     <div class="mb-8 text-center">
                         <h1 class="font-bold text-main" style="font-size: calc(1em + 0.5rem);">
                             Modificar Usuario
@@ -153,11 +153,28 @@ const enviar = () => {
                                     style="font-size: inherit;" 
                                 />
                             </div>
+
+                            <!-- Verificado -->
+                            <div class="md:col-span-2">
+                                <label class="block font-semibold text-main mb-2" style="font-size: calc(1em - 0.075rem);">
+                                    Estado de Verificación
+                                </label>
+                                <select
+                                    v-model="verificado"
+                                    class="w-full p-3 border rounded-lg card-bg text-main focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    style="font-size: inherit;"
+                                >
+                                    <option value="pendiente">Pendiente</option>
+                                    <option value="aprobado">Aprobado</option>
+                                    <option value="rechazado">Rechazado</option>
+                                    <option value="falta_informacion">Falta información</option>
+                                </select>
+                            </div>
                         </div>
 
                         <!-- Roles -->
                         <div class="border-t border-opacity-20 border-gray-300 pt-6">
-                            <label class="block font-semibold text-main mb-4" style="font-size: calc(1em + 0.125rem);">
+                            <label class="block font-semibold text-main mb-4" style="font-size: calc(1em - 0.125rem);">
                                 Asignación de Roles *
                             </label>
                             <p class="text-main opacity-70 mb-4" style="font-size: calc(1em - 0.125rem);">

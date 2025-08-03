@@ -11,12 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('contrato_pagos', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('contrato_id')->constrained('contratos');
-            $table->foreignId('pago_id')->constrained('pagos');
-            $table->timestamps();
-        });
+        // Schema::create('contrato_pagos', function (Blueprint $table) {
+        //     $table->id();
+        //     $table->foreignId('contrato_id')->constrained('contratos');
+        //     $table->foreignId('pago_id')->constrained('pagos');
+        //     $table->timestamps();
+        // });
     }
 
     /**

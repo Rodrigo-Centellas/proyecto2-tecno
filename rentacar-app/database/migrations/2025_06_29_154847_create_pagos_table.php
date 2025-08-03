@@ -20,7 +20,11 @@ return new class extends Migration
             $table->string('pagofacil_transaction_id')->nullable()->after('estado');
             $table->float('monto');
             $table->string('tipo_pago');
-            $table->foreignId('reserva_id')->nullable()->constrained('reservas');
+            $table->foreignId('reserva_id')
+                  ->nullable()
+                  ->constrained('reservas')
+                  ->cascadeOnDelete();
+            $table->string('metodo_pago')->nullable()->default('ninguno')->after('tipo_pago'); // Agregado método de pago con valor por defecto 'efectivo'
             $table->index('pagofacil_transaction_id');
             $table->timestamps();
         });

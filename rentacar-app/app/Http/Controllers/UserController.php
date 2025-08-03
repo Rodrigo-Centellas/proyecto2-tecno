@@ -10,26 +10,24 @@ use Spatie\Permission\Models\Role;
 
 class UserController extends Controller
 {
-public function index(Request $request)
-{
-    $search = $request->input('search');
+    public function index(Request $request)
+    {
+        $search = $request->input('search');
 
-    $users = User::with('roles')
-        ->when($search, function ($query, $search) {
-            $search = strtolower($search); // Normaliza la búsqueda a minúsculas
+        $users = User::with('roles')
+            ->when($search, function ($query, $search) {
+                $search = strtolower($search);
+                $query->whereRaw('LOWER(name) LIKE ?', ["%{$search}%"])
+                      ->orWhereRaw('LOWER(apellido) LIKE ?', ["%{$search}%"])
+                      ->orWhereRaw('LOWER(email) LIKE ?', ["%{$search}%"]);
+            })
+            ->get();
 
-            $query->whereRaw('LOWER(name) LIKE ?', ["%{$search}%"])
-                  ->orWhereRaw('LOWER(apellido) LIKE ?', ["%{$search}%"])
-                  ->orWhereRaw('LOWER(email) LIKE ?', ["%{$search}%"]);
-        })
-        ->get();
-
-    return Inertia::render('Users/Index', [
-        'users' => $users,
-        'filters' => $request->only('search'),
-    ]);
-}
-
+        return Inertia::render('Users/Index', [
+            'users' => $users,
+            'filters' => $request->only('search'),
+        ]);
+    }
 
     public function create()
     {
@@ -49,7 +47,8 @@ public function index(Request $request)
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:8',
             'roles' => 'array',
-            'roles.*' => 'exists:roles,id',
+            'roles.*' => 'exists:roles,name',
+            'verificado' => 'nullable|string|in:pendiente,aprobado,rechazado,falta_informacion',
         ]);
 
         $user = User::create([
@@ -60,6 +59,7 @@ public function index(Request $request)
             'telefono' => $data['telefono'],
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
+            'verificado' => $data['verificado'] ?? 'pendiente',
         ]);
 
         $user->syncRoles($data['roles'] ?? []);
@@ -86,6 +86,7 @@ public function index(Request $request)
             'email' => 'required|email|unique:users,email,' . $user->id,
             'roles' => 'array',
             'roles.*' => 'exists:roles,name',
+            'verificado' => 'nullable|string|in:pendiente,aprobado,rechazado,falta_informacion',
         ]);
 
         $user->update([
@@ -95,6 +96,7 @@ public function index(Request $request)
             'domicilio' => $data['domicilio'],
             'telefono' => $data['telefono'],
             'email' => $data['email'],
+            'verificado' => $data['verificado'] ?? $user->verificado,
         ]);
 
         $user->syncRoles($data['roles'] ?? []);
@@ -108,13 +110,11 @@ public function index(Request $request)
         return redirect()->route('users.index');
     }
 
-public function show(User $user)
-{
-    // Cargar las relaciones necesarias
-    $user->load('roles');
-    
-    return Inertia::render('Users/show', [
-        'user' => $user
-    ]);
-}
+    public function show(User $user)
+    {
+        $user->load('roles');
+        return Inertia::render('Users/Show', [
+            'user' => $user
+        ]);
+    }
 }

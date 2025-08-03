@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
          $this->call(NroCuentaSeeder::class);
          $this->call(FrecuenciaPagoSeeder::class);
          $this->call(ClausulaSeedeer::class);
+         $this->call(MantenimientoSeeder::class);
          //$this->call(PagoSeeder::class);
     }
 }

@@ -16,8 +16,10 @@ use App\Http\Controllers\ReportePagoController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ClausulaController;
+use App\Http\Controllers\FixedQrPagoController;
 use App\Http\Controllers\GlobalSearchController;
 use App\Http\Controllers\NotificacionController;
+use App\Http\Controllers\PagoQrController;
 //
 
 use Illuminate\Foundation\Application;
@@ -63,24 +65,34 @@ Route::middleware('auth')->group(function () {
     Route::resource('roles', RoleController::class);
     Route::resource('clausulas', ClausulaController::class);
 
-    // === RUTAS DE PAGOS CONSOLIDADAS ===
+    // === RUTAS DE PAGOS ACTUALIZADAS ===
     
-    // Rutas básicas de pagos (resource)
-    Route::resource('pagos', PagoController::class);
+    // IMPORTANTE: Las rutas específicas DEBEN ir ANTES del resource para evitar conflictos
     
-    // Rutas adicionales de pagos
-    Route::put('/pagos/{id}/pagar', [PagoController::class, 'pagar'])->name('pagos.pagar');
-    Route::post('/pagos/generar-desde-reserva/{reservaId}', [PagoController::class, 'generarDesdeReserva'])->name('pagos.desdeReserva');
-    Route::post('/pagos/generar-desde-contrato/{contratoId}', [PagoController::class, 'generarDesdeContrato'])->name('pagos.desdeContrato');
-    
-    // Rutas de PagoFácil QR
-    Route::post('/pagos/{pago}/generar-qr', [PagoController::class, 'generarQR'])->name('pagos.generarQR');
-    Route::get('/pagos/{pago}/consultar-estado', [PagoController::class, 'consultarEstado'])->name('pagos.consultarEstado');
-    Route::post('/pagos/verificar-pago', [PagoController::class, 'verificarPago'])->name('pagos.verificarPago');
-    
-    // Página de confirmación de pago
-    Route::get('/pagos/confirmacion', [PagoController::class, 'confirmacion'])->name('pagos.confirmacion');
+    // Rutas específicas de pagos (ANTES del resource)
+    Route::get('/pagos/{pago}/pagar', [PagoController::class, 'pagar'])
+        ->name('pagos.pagar');
 
+    /* Generar pagos desde otras entidades */
+    Route::post('/pagos/generar-desde-reserva/{reserva}',   [PagoController::class, 'generarDesdeReserva'])
+        ->name('pagos.desdeReserva');
+    Route::post('/pagos/generar-desde-contrato/{contrato}', [PagoController::class, 'generarDesdeContrato'])
+        ->name('pagos.desdeContrato');
+
+    /* ---------- Lógica QR (PagoQrController) ---------- */
+    Route::post('/pagos/{pago}/qr',  [PagoQrController::class, 'generarQR'])
+        ->name('pagos.qr.generar');
+    Route::post('/pagos/qr/verificar', [PagoQrController::class, 'verificarPago'])
+        ->name('pagos.qr.verificar');
+    Route::get ('/pagos/qr/confirmacion', [PagoQrController::class, 'confirmacion'])
+        ->name('pagos.qr.confirmacion');
+    Route::post('/pagos/{pago}/efectivo', [PagoController::class, 'pagarEfectivo'])
+    ->name('pagos.efectivo');
+    // Resource routes para pagos (DESPUÉS de las rutas específicas)
+    Route::resource('pagos', PagoController::class)->except(['create', 'edit']);
+    Route::post('/pagos/{pago}/qr-fijo', [FixedQrPagoController::class, 'generar'])->name('pagos.qr-fijo');
+Route::post('/pagos/{pago}/marcar-pagado', [FixedQrPagoController::class, 'marcarPagado'])->name('pagos.marcar-pagado');
+    
     // === FIN RUTAS DE PAGOS ===
 
     // 🔔 RUTAS DE NOTIFICACIONES (CORREGIDAS)

@@ -11,18 +11,25 @@ const props = defineProps({
 const form = useForm({
   vehiculo_id: props.vehiculoSeleccionado?.id || '',
   fecha: '',
+  fecha_usuario: dayjs().format('YYYY-MM-DD'), // Enviar la fecha "hoy" del usuario
 });
 
 const showImageModal = ref(false);
 
+// Mínimo: mañana (para coincidir con backend)
 const fechaMinima = computed(() =>
   dayjs().add(1, 'day').format('YYYY-MM-DD')
 );
 
+// Días de reserva = diferencia entre la fecha seleccionada y hoy
 const diasReserva = computed(() => {
-  const inicio = dayjs().add(1, 'day').startOf('day');
-  const fin = dayjs(form.fecha);
-  const dias = fin.diff(inicio, 'day') + 1;
+  if (!form.fecha) return 0;
+  
+  const inicio = dayjs().startOf('day'); // hoy
+  const fin = dayjs(form.fecha).startOf('day');
+  const dias = fin.diff(inicio, 'day');
+  
+  // Solo mostrar días positivos
   return dias > 0 ? dias : 0;
 });
 
@@ -37,12 +44,15 @@ const totalFinal = computed(() => totalPagar.value);
 const fechasFormateadas = computed(() => {
   if (!form.fecha) return { inicio: '', fin: '' };
   return {
-    inicio: dayjs().add(1, 'day').format('DD/MM/YYYY'),
+    inicio: dayjs().format('DD/MM/YYYY'), // empieza hoy
     fin: dayjs(form.fecha).format('DD/MM/YYYY'),
   };
 });
 
-const submit = () => form.post(route('reservas.store'));
+const submit = () => {
+  form.post(route('reservas.store'));
+};
+
 const openImageModal = () => (showImageModal.value = true);
 const closeImageModal = () => (showImageModal.value = false);
 </script>
@@ -144,8 +154,27 @@ const closeImageModal = () => (showImageModal.value = false);
 
             <!-- Formulario -->
             <div class="space-y-6">
+              <!-- Mostrar errores si existen -->
+              <div v-if="Object.keys(form.errors).length > 0" class="bg-red-50 border border-red-200 rounded-xl p-4">
+                <div class="flex items-start space-x-3">
+                  <svg class="w-6 h-6 text-red-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                  </svg>
+                  <div>
+                    <h5 class="font-medium text-red-800">Errores en el formulario:</h5>
+                    <ul class="text-sm text-red-700 mt-1 list-disc list-inside">
+                      <li v-for="(error, field) in form.errors" :key="field">
+                        {{ error }}
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
               <form @submit.prevent="submit" class="space-y-6">
                 <input type="hidden" v-model="form.vehiculo_id" />
+                <input type="hidden" v-model="form.fecha_usuario" />
 
                 <!-- Fecha -->
                 <div class="bg-blue-50 rounded-xl p-6">
@@ -155,15 +184,19 @@ const closeImageModal = () => (showImageModal.value = false);
                     v-model="form.fecha"
                     :min="fechaMinima"
                     class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 transition-colors"
+                    :class="{'border-red-500': form.errors.fecha}"
                     required
                   />
                   <p class="text-sm opacity-75 mt-2">
-                    Reserva desde mañana hasta la fecha seleccionada
+                    Reserva desde hoy hasta la fecha seleccionada (mínimo: mañana)
+                  </p>
+                  <p v-if="form.errors.fecha" class="text-sm text-red-600 mt-1">
+                    {{ form.errors.fecha }}
                   </p>
                 </div>
 
                 <!-- Período -->
-                <div v-if="form.fecha" class="bg-yellow-50 rounded-xl p-6">
+                <div v-if="form.fecha && diasReserva > 0" class="bg-yellow-50 rounded-xl p-6">
                   <h4 class="font-semibold mb-4">Período de Reserva</h4>
                   <div class="flex items-center justify-between">
                     <div class="text-center">
@@ -193,7 +226,7 @@ const closeImageModal = () => (showImageModal.value = false);
                 </div>
 
                 <!-- Costos -->
-                <div class="bg-gray-50 rounded-xl p-6">
+                <div v-if="diasReserva > 0" class="bg-gray-50 rounded-xl p-6">
                   <h4 class="font-semibold mb-4">Resumen de Costos</h4>
                   <div class="space-y-3">
                     <div class="flex justify-between">
@@ -233,11 +266,12 @@ const closeImageModal = () => (showImageModal.value = false);
                 <!-- Confirmar -->
                 <button
                   type="submit"
-                  :disabled="!form.fecha || form.processing"
-                  class="w-full py-4 rounded-xl font-semibold text-lg text-white bg-gradient-to-r from-blue-600 to-purple-600 shadow-lg hover:shadow-xl transition-all disabled:opacity-50"
+                  :disabled="!form.fecha || diasReserva <= 0 || form.processing"
+                  class="w-full py-4 rounded-xl font-semibold text-lg text-white bg-gradient-to-r from-blue-600 to-purple-600 shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <span v-if="form.processing">Procesando…</span>
-                  <span v-else>Confirmar Reserva</span>
+                  <span v-else-if="diasReserva <= 0">Selecciona una fecha válida</span>
+                  <span v-else>Confirmar Reserva (${{ totalFinal }})</span>
                 </button>
               </form>
             </div>

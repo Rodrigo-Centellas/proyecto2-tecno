@@ -52,8 +52,9 @@
         }
         th, td {
             border: 1px solid #ddd;
-            padding: 8px;
+            padding: 6px 8px;
             text-align: left;
+            vertical-align: top;
         }
         th {
             background-color: #f2f2f2;
@@ -78,6 +79,7 @@
         .badge-success { background-color: #d4edda; color: #155724; }
         .badge-warning { background-color: #fff3cd; color: #856404; }
         .badge-danger { background-color: #f8d7da; color: #721c24; }
+        .badge-info { background-color: #d1ecf1; color: #0c5460; }
         .badge-secondary { background-color: #e2e3e5; color: #383d41; }
         .total-row {
             font-weight: bold;
@@ -114,14 +116,15 @@
     <table>
         <thead>
             <tr>
-                <th style="width: 8%">ID</th>
-                <th style="width: 12%">Fecha</th>
-                <th style="width: 20%">Usuario</th>
-                <th style="width: 18%">Vehículo</th>
-                <th style="width: 12%">Tipo Pago</th>
-                <th style="width: 12%">Tipo Contrato</th>
+                <th style="width: 6%">ID</th>
+                <th style="width: 10%">Fecha</th>
+                <th style="width: 18%">Usuario</th>
+                <th style="width: 16%">Vehículo</th>
+                <th style="width: 10%">Tipo Pago</th>
+                <th style="width: 10%">Método Pago</th>
+                <th style="width: 10%">Fuente</th>
                 <th style="width: 10%">Monto</th>
-                <th style="width: 8%">Estado</th>
+                <th style="width: 10%">Estado</th>
             </tr>
         </thead>
         <tbody>
@@ -134,13 +137,22 @@
                 <td class="text-center">
                     <span class="badge badge-secondary">{{ ucfirst($pago['tipo_pago']) }}</span>
                 </td>
-                <td class="text-center">{{ $pago['tipo_contrato'] }}</td>
-                <td class="text-right">${{ number_format($pago['monto'], 2) }}</td>
+                <td class="text-center">
+                    @if(strtolower($pago['metodo_pago']) === 'efectivo')
+                        <span class="badge badge-success">Efectivo</span>
+                    @elseif(strtolower($pago['metodo_pago']) === 'qr')
+                        <span class="badge badge-info">QR</span>
+                    @else
+                        <span class="badge badge-secondary">{{ ucfirst($pago['metodo_pago']) }}</span>
+                    @endif
+                </td>
+                <td class="text-center">{{ $pago['fuente'] }}</td>
+                <td class="text-right">Bs. {{ number_format($pago['monto'], 2) }}</td>
                 <td class="text-center">
                     <span class="badge 
-                        @if($pago['estado'] == 'pagado') badge-success
-                        @elseif($pago['estado'] == 'pendiente') badge-warning
-                        @elseif($pago['estado'] == 'fallido') badge-danger
+                        @if(strtolower($pago['estado']) == 'pagado') badge-success
+                        @elseif(strtolower($pago['estado']) == 'pendiente') badge-warning
+                        @elseif(strtolower($pago['estado']) == 'fallido') badge-danger
                         @else badge-secondary
                         @endif">
                         {{ ucfirst($pago['estado']) }}
@@ -149,7 +161,7 @@
             </tr>
             @empty
             <tr>
-                <td colspan="8" class="text-center" style="padding: 20px; color: #666;">
+                <td colspan="9" class="text-center" style="padding: 20px; color: #666;">
                     No se encontraron pagos con los filtros aplicados
                 </td>
             </tr>
@@ -158,8 +170,8 @@
         @if(count($pagos) > 0)
         <tfoot>
             <tr class="total-row">
-                <td colspan="6" class="text-right"><strong>TOTAL GENERAL:</strong></td>
-                <td class="text-right"><strong>${{ number_format($pagos->sum('monto'), 2) }}</strong></td>
+                <td colspan="7" class="text-right"><strong>TOTAL GENERAL:</strong></td>
+                <td class="text-right"><strong>Bs. {{ number_format(collect($pagos)->sum('monto'), 2) }}</strong></td>
                 <td class="text-center">{{ count($pagos) }} pagos</td>
             </tr>
         </tfoot>
@@ -169,7 +181,7 @@
     @if(count($pagos) > 0)
     <div style="margin-top: 30px;">
         <h3>📈 Resumen por Estado:</h3>
-        <table style="width: 50%; margin-top: 10px;">
+        <table style="width: 60%; margin-top: 10px;">
             <thead>
                 <tr>
                     <th>Estado</th>
@@ -191,7 +203,7 @@
                 <tr>
                     <td>{{ ucfirst($resumen['estado']) }}</td>
                     <td class="text-center">{{ $resumen['cantidad'] }}</td>
-                    <td class="text-right">${{ number_format($resumen['monto'], 2) }}</td>
+                    <td class="text-right">Bs. {{ number_format($resumen['monto'], 2) }}</td>
                 </tr>
                 @endforeach
             </tbody>
@@ -199,8 +211,8 @@
     </div>
 
     <div style="margin-top: 20px;">
-        <h3>💰 Resumen por Tipo de Pago:</h3>
-        <table style="width: 50%; margin-top: 10px;">
+        <h3>💳 Resumen por Tipo de Pago:</h3>
+        <table style="width: 60%; margin-top: 10px;">
             <thead>
                 <tr>
                     <th>Tipo de Pago</th>
@@ -222,7 +234,38 @@
                 <tr>
                     <td>{{ ucfirst($resumen['tipo']) }}</td>
                     <td class="text-center">{{ $resumen['cantidad'] }}</td>
-                    <td class="text-right">${{ number_format($resumen['monto'], 2) }}</td>
+                    <td class="text-right">Bs. {{ number_format($resumen['monto'], 2) }}</td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+
+    <div style="margin-top: 20px;">
+        <h3>💵 Resumen por Método de Pago:</h3>
+        <table style="width: 60%; margin-top: 10px;">
+            <thead>
+                <tr>
+                    <th>Método de Pago</th>
+                    <th class="text-center">Cantidad</th>
+                    <th class="text-right">Monto Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                @php
+                    $resumenMetodos = collect($pagos)->groupBy('metodo_pago')->map(function($group, $metodo) {
+                        return [
+                            'metodo' => $metodo,
+                            'cantidad' => $group->count(),
+                            'monto' => $group->sum('monto')
+                        ];
+                    });
+                @endphp
+                @foreach($resumenMetodos as $resumen)
+                <tr>
+                    <td>{{ ucfirst($resumen['metodo']) }}</td>
+                    <td class="text-center">{{ $resumen['cantidad'] }}</td>
+                    <td class="text-right">Bs. {{ number_format($resumen['monto'], 2) }}</td>
                 </tr>
                 @endforeach
             </tbody>

@@ -525,80 +525,82 @@ public function destroy(Contrato $contrato)
 /**
  * Mostrar los detalles de un contrato específico
  */
-public function show(Contrato $contrato)
-{
-    Log::info('ContratoController::show - Mostrando contrato', [
-        'contrato_id' => $contrato->id,
-        'user_id' => Auth::id()
-    ]);
-
-    try {
-        // Cargar todas las relaciones necesarias
-        $contrato->load([
-            'frecuenciaPago',
-            'nroCuenta', 
-            'vehiculo',
-            'contrato_clausulas',
-            'users'
-        ]);
-
-        Log::info('ContratoController::show - Relaciones cargadas exitosamente');
-
-        // Procesar URL de imagen del vehículo
-        if ($contrato->vehiculo && $contrato->vehiculo->url_imagen) {
-            $contrato->vehiculo->url_imagen = asset('storage/' . $contrato->vehiculo->url_imagen);
-        }
-
-        // Preparar datos adicionales para la vista
-        $contratoData = $this->prepararDatosContrato($contrato);
-
-        Log::info('ContratoController::show - Datos preparados exitosamente');
-
-        return Inertia::render('Contratos/Show', [
-            'contrato' => $contrato,
-            'contratoData' => $contratoData,
-        ]);
-
-    } catch (\Exception $e) {
-        Log::error('ContratoController::show - Error al mostrar contrato', [
+    public function show(Contrato $contrato)
+    {
+        Log::info('ContratoController::show - Mostrando contrato', [
             'contrato_id' => $contrato->id,
-            'error' => $e->getMessage(),
-            'trace' => $e->getTraceAsString()
+            'user_id' => Auth::id()
         ]);
 
-        return back()->withErrors(['error' => 'Error al cargar el contrato: ' . $e->getMessage()]);
-    }
-}
+        try {
+            // Cargar relaciones con posible orden en cláusulas si existe pivot
+            $contrato->load([
+                'frecuenciapago',
+                'nrocuenta',
+                'vehiculo',
+                'contrato_clausulas' => function ($q) {
+                    $q->where('activa', true);
+                    // Si usás columna pivot 'orden', ordenar acá: ->orderBy('contrato_clausulas.orden')
+                },
+                'users'
+            ]);
 
-/**
- * Preparar datos adicionales para el contrato
- */
-private function prepararDatosContrato($contrato)
-{
-    $fechaInicio = Carbon::parse($contrato->fecha_inicio);
-    $fechaFin = Carbon::parse($contrato->fecha_fin);
-    $diasTotal = $fechaInicio->diffInDays($fechaFin) + 1;
-    
-    $montoTotal = 0;
-    $montoGarantia = 0;
-    
-    if ($contrato->vehiculo) {
-        $montoTotal = $diasTotal * $contrato->vehiculo->precio_dia;
-        $montoGarantia = $contrato->vehiculo->monto_garantia;
+            Log::info('ContratoController::show - Relaciones cargadas exitosamente', [
+                'clausulas_count' => $contrato->contrato_clausulas->count()
+            ]);
+
+            // Procesar URL de imagen del vehículo si aplica
+            if ($contrato->vehiculo && $contrato->vehiculo->url_imagen) {
+                $contrato->vehiculo->url_imagen = asset('storage/' . $contrato->vehiculo->url_imagen);
+            }
+
+            // Preparar datos adicionales para la vista
+            $contratoData = $this->prepararDatosContrato($contrato);
+
+            Log::info('ContratoController::show - Datos preparados exitosamente', [
+                'contratoData' => $contratoData
+            ]);
+
+            return Inertia::render('Contratos/Show', [
+                'contrato' => $contrato,
+                'contratoData' => $contratoData,
+            ]);
+        } catch (\Exception $e) {
+            Log::error('ContratoController::show - Error al mostrar contrato', [
+                'contrato_id' => $contrato->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return back()->withErrors(['error' => 'Error al cargar el contrato: ' . $e->getMessage()]);
+        }
     }
 
-    return [
-        'numero_contrato' => $this->generarNumeroContrato($contrato),
-        'fecha_actual' => $this->formatearFechaActual(),
-        'duracion_total' => $diasTotal,
-        'monto_total' => $montoTotal,
-        'monto_total_texto' => NumeroTextoHelper::aBolivianos($montoTotal),
-        'monto_garantia_texto' => NumeroTextoHelper::aBolivianos($montoGarantia),
-        'precio_dia_texto' => $contrato->vehiculo ? NumeroTextoHelper::aBolivianos($contrato->vehiculo->precio_dia) : '',
-        'fecha_inicio_formateada' => $fechaInicio->locale('es')->isoFormat('DD [de] MMMM [del] YYYY'),
-        'fecha_fin_formateada' => $fechaFin->locale('es')->isoFormat('DD [de] MMMM [del] YYYY'),
-    ];
-}
+    private function prepararDatosContrato(Contrato $contrato): array
+    {
+        $fechaInicio = \Illuminate\Support\Carbon::parse($contrato->fecha_inicio);
+        $fechaFin = \Illuminate\Support\Carbon::parse($contrato->fecha_fin);
+        $duracionTotal = $fechaFin->diffInDays($fechaInicio) + 1;
+
+        $precioDia = $contrato->vehiculo?->precio_dia ?? 0;
+        $montoTotal = $precioDia * $duracionTotal;
+        $montoGarantia = $contrato->vehiculo?->monto_garantia ?? 0;
+
+        // Número de contrato con formato (ajustar si tenés otra convención)
+        $numeroContrato = strtoupper("CTR-" . str_pad($contrato->id, 6, '0', STR_PAD_LEFT));
+
+        return [
+            'fecha_actual' => now()->locale('es')->isoFormat('LL'),
+            'numero_contrato' => $numeroContrato,
+            'fecha_inicio_formateada' => $fechaInicio->locale('es')->isoFormat('LL'),
+            'fecha_fin_formateada' => $fechaFin->locale('es')->isoFormat('LL'),
+            'duracion_total' => $duracionTotal,
+            'precio_dia_texto' => number_format($precioDia, 2, '.', ','),
+            'monto_total' => number_format($montoTotal, 2, '.', ','),
+            'monto_total_texto' => number_format($montoTotal, 2, '.', ','),
+            'monto_garantia_texto' => number_format($montoGarantia, 2, '.', ','),
+        ];
+    }
 
 /**
  * Generar número de contrato

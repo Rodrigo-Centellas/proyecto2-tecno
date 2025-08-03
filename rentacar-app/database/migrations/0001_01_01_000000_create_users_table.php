@@ -20,6 +20,7 @@ return new class extends Migration
             $table->integer('telefono');
             $table->string('documento_frontal_path')->nullable();
             $table->string('documento_trasero_path')->nullable(); 
+            $table->string('verificado')->nullable()->default('pendiente');
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');

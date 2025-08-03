@@ -15,5 +15,6 @@ public function contrato_clausulas()
     protected $casts = [
         'activa' => 'boolean',
     ];
+    
 
 }

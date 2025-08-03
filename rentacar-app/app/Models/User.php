@@ -25,6 +25,7 @@ class User extends Authenticatable
         'apellido',
         'ci',
         'domicilio',
+        'verificado',
         'telefono',
         'documento_frontal_path',
         'documento_trasero_path',

@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class ReservaController extends Controller
 {
@@ -102,56 +103,163 @@ public function create(Request $request)
 
 public function store(Request $request)
 {
-    $request->validate([
-        'vehiculo_id' => 'required|exists:vehiculos,id',
-        'fecha' => 'required|date|after:today', // la fecha debe ser futura
+    // DEBUG: Verificar timezone
+    Log::info('DEBUG TIMEZONE:', [
+        'app_timezone' => config('app.timezone'),
+        'server_time' => now()->toDateTimeString(),
+        'carbon_today' => Carbon::today()->toDateString(),
+        'carbon_now' => Carbon::now()->toDateTimeString(),
+        'php_date' => date('Y-m-d H:i:s'),
+        'fecha_recibida' => $request->fecha,
     ]);
 
-    $vehiculo = Vehiculo::findOrFail($request->vehiculo_id);
+    // Agregar logging para debug
+    Log::info('Datos recibidos en store:', $request->all());
 
-    // 🟢 Reserva es desde mañana (hoy + 1) hasta la fecha seleccionada
-    $inicio = Carbon::tomorrow(); // mañana
-    $fin = Carbon::parse($request->fecha)->startOfDay(); // fecha seleccionada por el usuario
-
-    if ($inicio->gt($fin)) {
-        return back()->withErrors([
-            'fecha' => 'La fecha debe ser mayor a mañana para que la reserva tenga al menos un día.',
+    try {
+        // Validación manual más específica
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+            'vehiculo_id' => 'required|exists:vehiculos,id',
+            'fecha' => 'required|date',
         ]);
+
+        // Validación adicional de fecha - debe ser al menos mañana
+        $fechaSeleccionada = Carbon::parse($request->fecha);
+        $hoy = Carbon::today();
+        $manana = Carbon::tomorrow();
+        
+        Log::info('Comparación de fechas:', [
+            'fecha_seleccionada' => $fechaSeleccionada->toDateString(),
+            'hoy' => $hoy->toDateString(),
+            'manana' => $manana->toDateString(),
+            'es_manana_o_posterior' => $fechaSeleccionada->gte($manana)
+        ]);
+
+        if ($fechaSeleccionada->lt($manana)) {
+            $validator->errors()->add('fecha', 'La fecha de devolución debe ser mañana o posterior.');
+        }
+
+        if ($validator->fails()) {
+            Log::error('Validación falló:', $validator->errors()->toArray());
+            return back()->withErrors($validator)->withInput();
+        }
+        Log::info('Validación pasada correctamente');
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        Log::error('Error de validación:', [
+            'errors' => $e->errors(),
+            'failed_rules' => $e->validator->failed()
+        ]);
+        throw $e;
     }
 
-    // ✅ Calcular días (incluyendo la fecha fin)
-    $dias = $inicio->diffInDays($fin) + 1;
+    try {
+        $vehiculo = Vehiculo::findOrFail($request->vehiculo_id);
 
-    // 💸 Calcular monto
-    $monto = $dias * $vehiculo->precio_dia;
+        // SOLUCIÓN DEFINITIVA: Usar el mismo timezone que el frontend
+        // El frontend usa timezone local, backend debe usar el mismo
+        
+        // Obtener fecha "hoy" desde el frontend (en la práctica, desde la perspectiva del usuario)
+        $fechaUsuario = $request->input('fecha_usuario', Carbon::today()->toDateString());
+        $fechaInicio = Carbon::parse($fechaUsuario); 
+        $fechaDevolucion = Carbon::parse($request->fecha);
+        
+        // Si no se envía fecha_usuario, calcular basado en la fecha seleccionada
+        if (!$request->has('fecha_usuario')) {
+            // Si selecciona mañana, significa que hoy es un día antes
+            $fechaInicio = $fechaDevolucion->copy()->subDay();
+        }
+        
+        $dias = $fechaInicio->diffInDays($fechaDevolucion);
+        
+        Log::info('Fechas y días calculados:', [
+            'fecha_inicio' => $fechaInicio->toDateString(),
+            'fecha_devolucion' => $fechaDevolucion->toDateString(),
+            'dias_alquiler' => $dias,
+            'timezone_app' => config('app.timezone'),
+            'explicacion' => "Alquiler desde {$fechaInicio->toDateString()} hasta {$fechaDevolucion->toDateString()} = {$dias} día(s)"
+        ]);
 
-    // 📌 Crear reserva
-    $reserva = Reserva::create([
-        'vehiculo_id' => $vehiculo->id,
-        'fecha' => $request->fecha, // esta es la fecha "hasta"
-        'estado' => 'Pendiente De pago',
-        'user_id' => Auth::id(),
-    ]);
+        // Validación: mínimo debe ser 1 día (ya validado arriba, pero por seguridad)
+        if ($dias < 1) {
+            Log::warning('Días calculados son < 1', ['dias' => $dias]);
+            return back()->withErrors([
+                'fecha' => 'Debe seleccionar al menos 1 día de alquiler.',
+            ]);
+        }
 
-    // 🟡 Actualizar estado del vehículo
-    $vehiculo->estado = 'Reservado';
-    $vehiculo->save();
+        // Calcular monto
+        $monto = $dias * $vehiculo->precio_dia;
+        
+        Log::info('Monto calculado:', [
+            'dias' => $dias,
+            'precio_dia' => $vehiculo->precio_dia,
+            'monto_total' => $monto
+        ]);
 
-    // 🧾 Crear el pago
-    Pago::create([
-        'desde' => $inicio,
-        'fecha' => now(),
-        'hasta' => $fin,
-        'estado' => 'pendiente',
-        'monto' => $monto,
-        'tipo_pago' => 'reserva',
-        'reserva_id' => $reserva->id,
-        'contrato_id' => null,
-    ]);
+        // Usar transacción para asegurar consistencia
+        DB::beginTransaction();
 
-    return redirect()->route('reservas.index')->with('success', 'Reserva y pago creados correctamente.');
+        try {
+            // Crear reserva
+            $reserva = Reserva::create([
+                'vehiculo_id' => $vehiculo->id,
+                'fecha' => $request->fecha,
+                'estado' => 'Pendiente De pago',
+                'user_id' => Auth::id(),
+            ]);
+
+            Log::info('Reserva creada:', ['reserva_id' => $reserva->id]);
+
+            // Actualizar estado del vehículo
+            $vehiculo->estado = 'Reservado';
+            $vehiculo->save();
+
+            Log::info('Vehículo actualizado:', ['vehiculo_id' => $vehiculo->id, 'nuevo_estado' => 'Reservado']);
+
+            // Crear el pago con fechas consistentes
+            $pago = Pago::create([
+                'desde' => $fechaInicio, // Hoy
+                'fecha' => now(),
+                'hasta' => $fechaDevolucion, // Fecha de devolución
+                'estado' => 'pendiente',
+                'monto' => $monto,
+                'tipo_pago' => 'reserva',
+                'reserva_id' => $reserva->id,
+                'contrato_id' => null,
+            ]);
+
+            Log::info('Pago creado:', ['pago_id' => $pago->id]);
+
+            DB::commit();
+
+            Log::info('Transacción completada exitosamente');
+
+            return redirect()->route('reservas.index')->with('success', 'Reserva y pago creados correctamente.');
+
+        } catch (\Exception $e) {
+            DB::rollback();
+            Log::error('Error en transacción de reserva:', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return back()->withErrors([
+                'general' => 'Error al crear la reserva. Por favor intenta nuevamente.'
+            ]);
+        }
+
+    } catch (\Exception $e) {
+        Log::error('Error general en store de reserva:', [
+            'error' => $e->getMessage(),
+            'request_data' => $request->all(),
+            'trace' => $e->getTraceAsString()
+        ]);
+
+        return back()->withErrors([
+            'general' => 'Error inesperado. Por favor intenta nuevamente.'
+        ]);
+    }
 }
-
 
     public function show($id)
     {
@@ -178,10 +286,20 @@ public function store(Request $request)
         return redirect()->route('reservas.index');
     }
 
-    public function destroy(Reserva $reserva)
-    {
-        $reserva->delete();
+public function destroy(Reserva $reserva)
+{
+    DB::transaction(function () use ($reserva) {
+        // Borrar pagos asociados primero
+        $reserva->pagos()->delete();
 
-        return redirect()->route('reservas.index');
-    }
+        // Liberar vehículo
+        $reserva->vehiculo->update(['estado' => 'Disponible']);
+
+        // Finalmente borrar la reserva
+        $reserva->delete();
+    });
+
+    return redirect()->route('reservas.index')->with('success', 'Reserva eliminada correctamente.');
+}
+
 }
