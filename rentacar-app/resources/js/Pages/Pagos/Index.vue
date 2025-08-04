@@ -1,8 +1,4 @@
-<script setup>
-import { useBaseUrl } from '@/composables/useBaseUrl';
-const { url } = useBaseUrl();
 
-</script>
 <template>
   <Head title="Pagos" />
 
@@ -216,7 +212,8 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, router, usePage } from '@inertiajs/vue3';
 import { ref, watch } from 'vue';
 import Swal from 'sweetalert2';
-
+import { useBaseUrl } from '@/composables/useBaseUrl';
+const { url } = useBaseUrl();
 const props = defineProps({
   pagos: Array,
   filters: Object,
