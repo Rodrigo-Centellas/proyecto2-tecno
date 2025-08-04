@@ -3,8 +3,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, useForm } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 import dayjs from 'dayjs';
-import { useBaseUrl } from '@/composables/useBaseUrl';
-const { url } = useBaseUrl();
+
 const props = defineProps({
   vehiculoSeleccionado: Object,
 });
