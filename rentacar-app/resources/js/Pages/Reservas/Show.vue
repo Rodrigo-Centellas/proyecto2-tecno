@@ -2,7 +2,8 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head } from '@inertiajs/vue3';
 import { format } from 'date-fns';
-
+import { useBaseUrl } from '@/composables/useBaseUrl';
+const { url } = useBaseUrl();
 const props = defineProps({
   reserva: Object,
 });
@@ -69,7 +70,7 @@ const formatFecha = (fecha) =>
           </div>
 
           <a
-            href="/reservas"
+            :href="url('/reservas')"
             class="inline-block px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
             style="font-size: inherit;"
           >
