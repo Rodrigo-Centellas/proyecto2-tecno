@@ -8,7 +8,7 @@
           Realizar Pago #{{ pago.id }}
         </h2>
         <button
-          @click="$inertia.visit(url(`/pagos/${pago.id}`))"
+          @click="router.visit(`/pagos/${pago.id}`)"
           class="inline-flex items-center px-4 py-2 bg-gray-600 text-white text-sm font-medium rounded-lg hover:bg-gray-700 transition-colors"
         >
           <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -216,8 +216,7 @@ import { Head, router } from '@inertiajs/vue3';
 import Swal from 'sweetalert2';
 import { ref, computed } from 'vue';
 import axios from 'axios';
-import { useBaseUrl } from '@/composables/useBaseUrl';  
-const { url } = useBaseUrl();
+
 const props = defineProps({
   pago: Object,
 });
@@ -243,7 +242,7 @@ const mostrarQrFijo = async () => {
   qrImageUrl.value = '';
 
   try {
-    const res = await axios.post(url(`/pagos/${pago.id}/qr-fijo`));
+    const res = await axios.post(`/pagos/${pago.id}/qr-fijo`);
     if (res.data.success && res.data.qr_image) {
       qrImageUrl.value = res.data.qr_image;
     } else {
@@ -262,7 +261,7 @@ const marcarComoPagado = async () => {
   if (marcando.value) return;
   marcando.value = true;
   try {
-    const res = await axios.post(url(`/pagos/${pago.id}/marcar-pagado`));
+    const res = await axios.post(`/pagos/${pago.id}/marcar-pagado`);
     if (res.data.success) {
       Swal.fire('Listo', res.data.message, 'success').then(() => {
         router.reload();
@@ -280,7 +279,7 @@ const marcarComoPagado = async () => {
 // Pago en efectivo
 const confirmarEfectivo = async () => {
   try {
-    const resp = await axios.post(url(`/pagos/${pago.id}/efectivo`), {});
+    const resp = await axios.post(`/pagos/${pago.id}/efectivo`, {});
     Swal.fire('Listo', 'Pago en efectivo registrado correctamente', 'success').then(() => {
       router.reload();
     });
