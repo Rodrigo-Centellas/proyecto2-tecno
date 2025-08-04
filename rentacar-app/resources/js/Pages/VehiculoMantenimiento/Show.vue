@@ -2,7 +2,8 @@
 import { computed } from 'vue';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, router, usePage } from '@inertiajs/vue3';
-
+import { useBaseUrl } from '@/composables/useBaseUrl';
+const { url } = useBaseUrl();
 const props = defineProps({
   registro: Object,
 });
@@ -27,7 +28,7 @@ const formatearFecha = (f) => {
           Detalle del Registro #{{ registro.id }}
         </h2>
         <button
-          @click="router.visit('/registro-mantenimientos')"
+          @click="router.visit(url('/registro-mantenimientos'))"
           class="inline-flex items-center px-4 py-2 bg-gray-600 text-white text-sm font-medium rounded-lg hover:bg-gray-700 transition-colors"
         >
           ← Volver

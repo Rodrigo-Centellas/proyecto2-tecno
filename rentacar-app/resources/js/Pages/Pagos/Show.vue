@@ -10,7 +10,7 @@
           </h2>
         </div>
         <button
-          @click="$inertia.visit('/pagos')"
+          @click="$inertia.visit(url('/pagos')"
           class="inline-flex items-center px-4 py-2 rounded-lg transition-colors font-medium shadow-sm bg-muted hover:bg-muted-hover text-button"
         >
           <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -140,6 +140,8 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head } from '@inertiajs/vue3';
+import { useBaseUrl } from '@/composables/useBaseUrl';
+const { url } = useBaseUrl();
 
 const props = defineProps({
   pago: Object,

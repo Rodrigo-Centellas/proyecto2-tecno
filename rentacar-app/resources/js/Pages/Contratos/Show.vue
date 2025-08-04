@@ -4,7 +4,8 @@ import { Head, Link, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
 import dayjs from 'dayjs';
 import 'dayjs/locale/es';
-
+import { useBaseUrl } from '@/composables/useBaseUrl';
+const { url } = useBaseUrl();
 dayjs.locale('es');
 
 const props = defineProps({
@@ -108,7 +109,7 @@ const descargarPDF = () => {
     <template #header>
       <div class="flex items-center justify-between no-print">
         <div class="flex items-center space-x-3">
-          <Link href="/contratos" class="text-gray-500 hover:text-gray-700">
+          <Link :href="url('/contratos')" class="text-gray-500 hover:text-gray-700">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -137,7 +138,7 @@ const descargarPDF = () => {
           </button>
 
           <!-- Botón de Descargar PDF -->
-          <button
+          <!-- <button
             @click="descargarPDF"
             class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors flex items-center space-x-2"
           >
@@ -146,12 +147,12 @@ const descargarPDF = () => {
                     d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
             <span>PDF</span>
-          </button>
+          </button> -->
 
           <!-- Editar solo si no es cliente único -->
           <Link
             v-if="!isClienteOnly && hasPermission('contratos.editar')"
-            :href="`/contratos/${contrato.id}/edit`"
+            :href="url(`/contratos/${contrato.id}/edit`)"
             class="bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600 transition-colors flex items-center space-x-2"
           >
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

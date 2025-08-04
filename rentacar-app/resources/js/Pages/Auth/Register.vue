@@ -6,7 +6,8 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import { Head, useForm } from '@inertiajs/vue3';
 import { ref, computed, watch, onMounted } from 'vue';
-
+import { useBaseUrl } from '@/composables/useBaseUrl';
+const { url } = useBaseUrl();
 const form = useForm({
   name: '',
   apellido: '',
@@ -64,7 +65,7 @@ watch(effectiveTheme, () => {
 });
 
 const submit = () => {
-  form.post(route('register'), {
+  form.post(route(url('register')), {
     onFinish: () => form.reset('password', 'password_confirmation'),
   });
 };

@@ -1,7 +1,13 @@
+<script setup>
+import { useBaseUrl } from '@/composables/useBaseUrl';
+const { url } = useBaseUrl();
+
+</script>
 <template>
   <Head title="Pagos" />
 
   <AuthenticatedLayout>
+    
     <template #header>
       <h2 class="text-xl font-semibold leading-tight text-gray-800">
         Gestión de Pagos
@@ -220,16 +226,16 @@ const page = usePage();
 const search = ref(props.filters?.search || '');
 
 watch(search, (val) => {
-  router.get('/pagos', { search: val }, { preserveState: true, replace: true });
+  router.get(url('/pagos'), { search: val }, { preserveState: true, replace: true });
 });
 
 // Funciones de navegación
 const verDetalle = (pago) => {
-  router.visit(`/pagos/${pago.id}`);
+  router.visit(url('pagos.show', pago.id));
 };
 
 const irAPagar = (pago) => {
-  router.visit(`/pagos/${pago.id}/pagar`);
+  router.visit(url('pagos.pagar', pago.id));
 };
 
 // Funciones de formateo

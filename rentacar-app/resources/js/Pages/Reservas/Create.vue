@@ -3,7 +3,8 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, useForm } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 import dayjs from 'dayjs';
-
+import { useBaseUrl } from '@/composables/useBaseUrl';
+const { url } = useBaseUrl();
 const props = defineProps({
   vehiculoSeleccionado: Object,
 });
@@ -50,7 +51,7 @@ const fechasFormateadas = computed(() => {
 });
 
 const submit = () => {
-  form.post(route('reservas.store'));
+  form.post(route(url('reservas.store')));
 };
 
 const openImageModal = () => (showImageModal.value = true);

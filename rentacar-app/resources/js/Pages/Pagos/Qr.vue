@@ -1,8 +1,10 @@
-<script setup>
+ <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, router } from '@inertiajs/vue3';
 import Swal from 'sweetalert2';
 import { ref, onMounted } from 'vue';
+import { useBaseUrl } from '@/composables/useBaseUrl';
+const { url } = useBaseUrl();
 
 const props = defineProps({
   pagos: Array,
@@ -24,7 +26,7 @@ const generarQR = async (pago) => {
   cargandoQR.value = true;
 
   try {
-    const response = await fetch(`/api/pagos/${pago.id}/generar-qr`, {
+    const response = await fetch(url(`/api/pagos/${pago.id}/generar-qr`), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -88,7 +90,7 @@ const consultarEstadoPago = async () => {
   consultandoEstado.value = true;
 
   try {
-    const response = await fetch(`/api/pagos/${pagoSeleccionado.value.id}/consultar-estado`);
+    const response = await fetch(url(`/api/pagos/${pagoSeleccionado.value.id}/consultar-estado`));
     const data = await response.json();
 
     if (data.success && data.estado === 'pagado') {

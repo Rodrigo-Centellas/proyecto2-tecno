@@ -4,7 +4,8 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, router, usePage } from '@inertiajs/vue3';
 import { useForm } from '@inertiajs/vue3';
 import Swal from 'sweetalert2';
-
+import { useBaseUrl } from '@/composables/useBaseUrl';
+const { url } = useBaseUrl();
 const props = defineProps({
   registro: Object,
   vehiculos: Array,
@@ -32,7 +33,7 @@ const submit = async () => {
     return;
   }
 
-  form.put(`/registro-mantenimientos/${props.registro.id}`, {
+  form.put(url(`/registro-mantenimientos/${props.registro.id}`), {
     onSuccess: () => {
       Swal.fire('OK', 'Registro actualizado correctamente', 'success');
     },
@@ -54,7 +55,7 @@ const submit = async () => {
           Editar Registro de Mantenimiento
         </h2>
         <button
-          @click="router.visit('/registro-mantenimientos')"
+          @click="router.visit(url('/registro-mantenimientos'))"
           class="inline-flex items-center px-4 py-2 bg-gray-600 text-white text-sm font-medium rounded-lg hover:bg-gray-700 transition-colors"
         >
           ← Volver

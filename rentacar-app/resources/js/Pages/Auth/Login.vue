@@ -7,7 +7,8 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import { ref, watch, computed, onMounted } from 'vue';
-
+import { useBaseUrl } from '@/composables/useBaseUrl';
+const { url } = useBaseUrl();
 defineProps({
   canResetPassword: Boolean,
   status: String,
@@ -61,7 +62,7 @@ watch(effectiveTheme, () => {
 });
 
 const submit = () => {
-  form.post(route('login'), {
+  form.post(route(url('login')), {
     onFinish: () => form.reset('password'),
   });
 };

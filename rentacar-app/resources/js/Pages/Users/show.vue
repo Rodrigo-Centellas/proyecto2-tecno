@@ -2,7 +2,8 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link } from '@inertiajs/vue3';
 import { ref, computed, onMounted, watch } from 'vue';
-
+import { useBaseUrl } from '@/composables/useBaseUrl';
+const { url } = useBaseUrl();
 // Props
 const props = defineProps({
   user: Object,
@@ -99,7 +100,7 @@ const badgeVerifiedClass = (status) => {
     <template #header>
       <div class="flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0">
         <div class="flex items-center space-x-3">
-          <Link href="/users" class="hover:opacity-80">
+          <Link :href="url('/users')" class="hover:opacity-80">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
           </svg>
@@ -111,7 +112,7 @@ const badgeVerifiedClass = (status) => {
           </div>
         </div>
 
-        <Link :href="`/users/${user.id}/edit`"
+        <Link :href="url(`/users/${user.id}/edit`)"
           class="flex items-center space-x-2 px-6 py-2 font-medium rounded-lg shadow-md hover:shadow-lg transition-shadow"
           :class="effectiveTheme.value === 'dark' ? 'bg-gray-700 text-white' : 'bg-white text-gray-900'"
           style="font-size: inherit;">
@@ -236,7 +237,7 @@ const badgeVerifiedClass = (status) => {
                     {{ doc.label }}
                   </label>
                   <div v-if="doc.path" class="space-y-2">
-                    <img :src="`/storage/${doc.path}`" :alt="doc.label"
+                    <img :src="url(`/storage/${doc.path}`)" :alt="doc.label"
                       class="w-full max-w-xs mx-auto rounded-lg border shadow-sm hover:shadow-md transition-shadow cursor-pointer"
                       @click="openImage(doc.path)" />
                     <p class="text-xs" :class="subtleText">Click para ampliar</p>
@@ -297,7 +298,7 @@ const badgeVerifiedClass = (status) => {
     <!-- Lightbox -->
     <div v-if="selectedImage" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50"
       @click="closeImage">
-      <img :src="`/storage/${selectedImage}`" alt="Ampliado" class="max-w-full max-h-full rounded-lg shadow-lg" />
+      <img :src="url(`/storage/${selectedImage}`)" alt="Ampliado" class="max-w-full max-h-full rounded-lg shadow-lg" />
     </div>
   </AuthenticatedLayout>
 </template>
