@@ -13,46 +13,54 @@ class FixedQrPagoController extends Controller
     /**
      * Devuelve el QR fijo como data-uri.
      */
-    public function generar(Pago $pago)
-    {
-        try {
-            if ($pago->estado !== 'pendiente') {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'El pago no está pendiente y no se puede mostrar el QR fijo.'
-                ], 400);
-            }
-
-            $path = 'qr.jpg'; // storage/app/public/qr.jpg
-            if (!Storage::disk('public')->exists($path)) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'No se encontró el QR fijo en el storage.'
-                ], 404);
-            }
-
-            $contents = Storage::disk('public')->get($path);
-            $base64 = base64_encode($contents);
-            $mime = 'image/jpeg';
-
-            return response()->json([
-                'success' => true,
-                'qr_image' => "data:{$mime};base64,{$base64}",
-                'transaction_id' => null,
-                'expiration_date' => null,
-                'message' => 'QR fijo cargado correctamente',
-            ]);
-        } catch (\Throwable $e) {
-            Log::error('FixedQrPagoController::generar', [
-                'pago_id' => $pago->id,
-                'error' => $e->getMessage(),
-            ]);
+ public function generar(Pago $pago)
+{
+    try {
+        if ($pago->estado !== 'pendiente') {
             return response()->json([
                 'success' => false,
-                'message' => 'Error interno al cargar el QR fijo',
-            ], 500);
+                'message' => 'El pago no está pendiente y no se puede mostrar el QR fijo.'
+            ], 400);
         }
+
+        // Ruta al archivo QR en resources
+        $path = resource_path('images/qr.jpg');
+        
+        // Verificar si el archivo existe
+        if (!file_exists($path)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No se encontró el QR fijo en resources/images/qr.jpg'
+            ], 404);
+        }
+
+        // Leer el contenido del archivo
+        $contents = file_get_contents($path);
+        $base64 = base64_encode($contents);
+        
+        // Detectar el tipo MIME
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $mime = finfo_file($finfo, $path);
+        finfo_close($finfo);
+
+        return response()->json([
+            'success' => true,
+            'qr_image' => "data:{$mime};base64,{$base64}",
+            'transaction_id' => null,
+            'expiration_date' => null,
+            'message' => 'QR fijo cargado correctamente',
+        ]);
+    } catch (\Throwable $e) {
+        Log::error('FixedQrPagoController::generar', [
+            'pago_id' => $pago->id,
+            'error' => $e->getMessage(),
+        ]);
+        return response()->json([
+            'success' => false,
+            'message' => 'Error interno al cargar el QR fijo',
+        ], 500);
     }
+}
 
     /**
      * Marca el pago como pagado usando el flujo del QR fijo.
