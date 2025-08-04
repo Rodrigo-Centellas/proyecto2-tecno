@@ -24,7 +24,7 @@ const generarQR = async (pago) => {
   cargandoQR.value = true;
 
   try {
-    const response = await fetch(`/api/pagos/${pago.id}/generar-qr`, {
+    const response = await fetch(url(`/api/pagos/${pago.id}/generar-qr`)  , {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -88,7 +88,7 @@ const consultarEstadoPago = async () => {
   consultandoEstado.value = true;
 
   try {
-    const response = await fetch(`/api/pagos/${pagoSeleccionado.value.id}/consultar-estado`);
+    const response = await fetch(url(`/api/pagos/${pagoSeleccionado.value.id}/consultar-estado`));
     const data = await response.json();
 
     if (data.success && data.estado === 'pagado') {

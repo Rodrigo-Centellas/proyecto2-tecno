@@ -8,7 +8,7 @@
           Realizar Pago #{{ pago.id }}
         </h2>
         <button
-          @click="$inertia.visit(`/pagos/${pago.id}`)"
+          @click="$inertia.visit(url(`/pagos/${pago.id}`))"
           class="inline-flex items-center px-4 py-2 bg-gray-600 text-white text-sm font-medium rounded-lg hover:bg-gray-700 transition-colors"
         >
           <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
