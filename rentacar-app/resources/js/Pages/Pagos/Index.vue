@@ -1,9 +1,7 @@
-
 <template>
   <Head title="Pagos" />
 
   <AuthenticatedLayout>
-    
     <template #header>
       <h2 class="text-xl font-semibold leading-tight text-gray-800">
         Gestión de Pagos
@@ -214,6 +212,7 @@ import { ref, watch } from 'vue';
 import Swal from 'sweetalert2';
 import { useBaseUrl } from '@/composables/useBaseUrl';
 const { url } = useBaseUrl();
+
 const props = defineProps({
   pagos: Array,
   filters: Object,
@@ -228,11 +227,11 @@ watch(search, (val) => {
 
 // Funciones de navegación
 const verDetalle = (pago) => {
-  router.visit(url('pagos.show', pago.id));
+  router.visit(url(`/pagos/${pago.id}`));
 };
 
 const irAPagar = (pago) => {
-  router.visit(url('pagos.pagar', pago.id));
+  router.visit(url(`/pagos/${pago.id}/pagar`));
 };
 
 // Funciones de formateo

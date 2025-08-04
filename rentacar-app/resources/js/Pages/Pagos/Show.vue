@@ -140,7 +140,7 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head } from '@inertiajs/vue3';
-import { useBaseUrl } from '@/composables/useBaseUrl';
+import { useBaseUrl } from '@/composables/useBaseUrl';  
 const { url } = useBaseUrl();
 const props = defineProps({
   pago: Object,

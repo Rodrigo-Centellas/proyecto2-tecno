@@ -211,14 +211,13 @@
 </template>
 
 <script setup>
-import { useBaseUrl } from '@/composables/useBaseUrl';
-const { url } = useBaseUrl();
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, router } from '@inertiajs/vue3';
 import Swal from 'sweetalert2';
 import { ref, computed } from 'vue';
 import axios from 'axios';
-
+import { useBaseUrl } from '@/composables/useBaseUrl';  
+const { url } = useBaseUrl();
 const props = defineProps({
   pago: Object,
 });
@@ -244,7 +243,7 @@ const mostrarQrFijo = async () => {
   qrImageUrl.value = '';
 
   try {
-    const res = await axios.post(url('pagos.qr_fijo', pago.id));
+    const res = await axios.post(url(`/pagos/${pago.id}/qr-fijo`));
     if (res.data.success && res.data.qr_image) {
       qrImageUrl.value = res.data.qr_image;
     } else {
@@ -263,7 +262,7 @@ const marcarComoPagado = async () => {
   if (marcando.value) return;
   marcando.value = true;
   try {
-    const res = await axios.post(url('pagos.marcar_pagado', pago.id)  );
+    const res = await axios.post(url(`/pagos/${pago.id}/marcar-pagado`));
     if (res.data.success) {
       Swal.fire('Listo', res.data.message, 'success').then(() => {
         router.reload();
@@ -281,7 +280,7 @@ const marcarComoPagado = async () => {
 // Pago en efectivo
 const confirmarEfectivo = async () => {
   try {
-    const resp = await axios.post(url(`/pagos/${pago.id}/efectivo`, {}));
+    const resp = await axios.post(url(`/pagos/${pago.id}/efectivo`), {});
     Swal.fire('Listo', 'Pago en efectivo registrado correctamente', 'success').then(() => {
       router.reload();
     });
