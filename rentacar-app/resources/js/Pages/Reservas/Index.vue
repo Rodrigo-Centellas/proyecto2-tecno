@@ -4,8 +4,7 @@ import { Head, router, usePage } from '@inertiajs/vue3';
 import { ref, watch, computed } from 'vue';
 import dayjs from 'dayjs'
 import 'dayjs/locale/es'     // opcional: para nombres de mes en español
-import { useBaseUrl } from '@/composables/useBaseUrl';
-const { url } = useBaseUrl();
+
 dayjs.locale('es')
 import Swal from 'sweetalert2';
 
@@ -25,7 +24,7 @@ const props = defineProps({
 const search = ref(props.filters?.search || '');
 
 watch(search, (value) => {
-  router.get(route(url('reservas.index')), { search: value }, {
+  router.get(route('reservas.index'), { search: value }, {
     preserveState: true,
     replace: true,
   });
@@ -41,7 +40,7 @@ const eliminar = (id) => {
     cancelButtonText: 'Cancelar',
   }).then((result) => {
     if (result.isConfirmed) {
-      router.delete(route(url('reservas.destroy', id)));
+      router.delete(route('reservas.destroy', id));
     }
   });
 };
@@ -64,7 +63,7 @@ const eliminar = (id) => {
             <h1 class="font-bold text-main" style="font-size: calc(1em + 0.5rem);">
               Lista de Reservas
             </h1>
-            <a v-if="hasPermission('reservas.crear')" :href="route(url('reservas.create'))"
+            <a v-if="hasPermission('reservas.crear')" :href="route('reservas.create')"
               class="mt-4 sm:mt-0 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-md"
               style="font-size: inherit;">
               Nueva Reserva
@@ -121,11 +120,11 @@ const eliminar = (id) => {
                       'text-blue-600 font-semibold': r.estado === 'Completada',
                     }" style="font-size: inherit;">
                       {{ r.estado }}
-                    </span> 
+                    </span>
                   </td>
                   <td class="px-4 py-3 border">
                     <div class="flex flex-wrap items-center gap-3">
-                      <a :href="route(url('reservas.show'), r.id)"
+                      <a :href="route('reservas.show', r.id)"
                         class="inline-flex items-center px-3 py-1 text-xs font-medium bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
                         style="font-size: calc(0.875em);">
                         Ver
