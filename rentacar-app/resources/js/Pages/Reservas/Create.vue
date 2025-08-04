@@ -51,7 +51,7 @@ const fechasFormateadas = computed(() => {
 });
 
 const submit = () => {
-  form.post(route(url('reservas.store')));
+  form.post(route('reservas.store'));
 };
 
 const openImageModal = () => (showImageModal.value = true);
