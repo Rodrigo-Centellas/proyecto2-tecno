@@ -8,7 +8,8 @@ import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
 import { Link, router, usePage } from '@inertiajs/vue3';
 import { useTheme } from '@/composables/useTheme';
 import { useNotifications } from '@/composables/useNotifications';
-
+import { useBaseUrl } from '@/composables/useBaseUrl';
+const { url } = useBaseUrl();
 const $page = usePage();
 const showingNavigationDropdown = ref(false);
 const { theme, setTheme, fontSize, setFontSize, contrast, setContrast } = useTheme();
@@ -68,11 +69,11 @@ const handleSearch = () => {
 
   searching.value = true;
 
-  searchTimeout = setTimeout(async () => {
-    try {
-      const response = await fetch(`/search?q=${encodeURIComponent(searchQuery.value)}&category=${searchCategory.value}`, {
-        headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
-      });
+searchTimeout = setTimeout(async () => {
+  try {
+    const response = await fetch(url(`/search?q=${encodeURIComponent(searchQuery.value)}&category=${searchCategory.value}`), {
+      headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
+    });
 
       if (response.ok) {
         const data = await response.json();
@@ -100,7 +101,7 @@ const goToResult = (result) => {
   };
 
   if (routes[result.type]) {
-    router.visit(routes[result.type]);
+    router.visit(url(routes[result.type]));
   }
 };
 
@@ -117,7 +118,7 @@ const toggleNotificaciones = () => {
 };
 
 const verTodasNotificaciones = () => {
-  router.visit('/notificaciones');
+  router.visit(url('/notificaciones'));
 };
 
 const crearPrueba = async () => {
