@@ -65,7 +65,7 @@ watch(effectiveTheme, () => {
 });
 
 const submit = () => {
-  form.post(route(url('register')), {
+  form.post(route(url('/register')), {
     onFinish: () => form.reset('password', 'password_confirmation'),
   });
 };

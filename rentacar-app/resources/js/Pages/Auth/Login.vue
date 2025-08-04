@@ -62,7 +62,7 @@ watch(effectiveTheme, () => {
 });
 
 const submit = () => {
-  form.post(route(url('login')), {
+  form.post(route(url('/login')), {
     onFinish: () => form.reset('password'),
   });
 };
