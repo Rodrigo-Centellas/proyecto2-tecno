@@ -267,8 +267,9 @@ public function store(Request $request)
         return Inertia::render('Reservas/Show', ['reserva' => $reserva]);
     }
 
-    public function edit(Reserva $reserva)
+public function edit(Reserva $reserva)
     {
+        $reserva->load(['vehiculo', 'user']);
         return Inertia::render('Reservas/Edit', [
             'reserva' => $reserva,
         ]);
@@ -277,13 +278,25 @@ public function store(Request $request)
     public function update(Request $request, Reserva $reserva)
     {
         $request->validate([
-            'estado' => 'required|string',
-            'fecha' => 'required|date',
+            'estado' => [
+                'required',
+                // Ajusta estos valores según los estados válidos en tu aplicación
+                'in:Cancelada',
+            ],
         ]);
 
-        $reserva->update($request->only('estado', 'fecha'));
+        $reserva->update([
+            'estado' => $request->estado,
+        ]);
 
-        return redirect()->route('reservas.index');
+        // Si se canceló, liberar el vehículo
+        if ($request->estado === 'Cancelada') {
+            $reserva->vehiculo->update(['estado' => 'Disponible']);
+        }
+
+        return redirect()
+            ->route('reservas.index')
+            ->with('success', 'Estado de la reserva actualizado correctamente.');
     }
 
 public function destroy(Reserva $reserva)
